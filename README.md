@@ -1,6 +1,8 @@
-# ACMail
+# KyneMail
 
-An email client for AmigaOS 3.2.3 and AROS 68k: IMAP and SMTP over TLS, OAuth 2 sign-in (XOAUTH2) for Gmail and Outlook.com, and a ReAction interface. ACMail is a working name.
+An email client for AmigaOS 3.2.3 and AROS 68k: IMAP and SMTP over TLS, OAuth 2 sign-in (XOAUTH2) for Gmail and Outlook.com, and a ReAction interface.
+
+KyneMail is free: MIT licence (`LICENSE`), at no cost, to use, change and pass on.
 
 It is written from the standards (RFC 3501, 5321, 5322, 2045-2049, 2047, 4616, 4959) and the providers' OAuth notes. SimpleMail served as a checklist of what a mail client on the Amiga does, but none of its code is used.
 
@@ -11,10 +13,10 @@ It is written from the standards (RFC 3501, 5321, 5322, 2045-2049, 2047, 4616, 4
 | `engine/` | Portable C: the protocols, MIME and the mail store. It builds unchanged for AmigaOS 3.x, AROS and the host |
 | `platform/posix/` | The network for the host's tests: POSIX sockets and OpenSSL |
 | `platform/amiga/` | The network on the Amiga: bsdsocket.library and AmiSSL 5; a bigger stack for main |
-| `tools/` | ACMailCheck: signs in, lists folders and the newest subjects. The engine's first program on the Amiga |
+| `tools/` | KyneMailCheck: signs in, lists folders and the newest subjects. The engine's first program on the Amiga |
 | `tests/host/` | The engine's tests on the host, with a scripted IMAP server |
 
-The engine meets the network only through `engine/acm_net.h`, so the same protocol code runs on both.
+The engine meets the network only through `engine/km_net.h`, so the same protocol code runs on both.
 
 ## Where it stands
 
@@ -22,7 +24,7 @@ The engine meets the network only through `engine/acm_net.h`, so the same protoc
 | --- | --- |
 | 1. IMAP over TLS or STARTTLS: PLAIN, LOGIN and XOAUTH2 sign-in; folders; select; summaries; whole messages; flags | **Done, tested on the host** |
 | 2. Headers for people: fields, RFC 2047 encoded words, names and addresses, dates; seven charsets to UTF-8, and UTF-8 to the Amiga's Latin-1 | **Done, tested on the host** |
-| 3. The Amiga's network: bsdsocket.library and AmiSSL 5 (`OpenAmiSSLTags`), read timeouts with WaitSelect | **Built**: ACMailCheck runs on OS 3.2.3 and reports a missing stack; a session waits for a TCP/IP stack in the guest (ACNet) |
+| 3. The Amiga's network: bsdsocket.library and AmiSSL 5 (`OpenAmiSSLTags`), read timeouts with WaitSelect | **Done**: on AmigaOS 3.2.3 over ACNet (2 Oct 2026), KyneMailCheck reaches imap.gmail.com and outlook.office365.com: DNS, TCP, a TLS handshake with the certificate checked, and the IMAP capabilities (both offer XOAUTH2) |
 | 4. The ReAction main window: folders, message list, plain-text reading | |
 | 5. SMTP and the compose window | |
 | 6. MIME: multipart, quoted-printable, base64, attachments | |
@@ -48,8 +50,10 @@ The fake server checks each command it receives, and a session passes only when 
 
     ./build-os3.sh /path/to/AmiSSL/Developer/include
 
-It builds `build/os3/ACMailCheck` with the os32 stove (bebbo's m68k-amigaos-gcc 6.5, NDK 3.2), soft float. To run it, the Amiga needs a TCP/IP stack (bsdsocket.library) and AmiSSL 5 installed:
+It builds `build/os3/KyneMailCheck` with the os32 stove (bebbo's m68k-amigaos-gcc 6.5, NDK 3.2), soft float. To run it, the Amiga needs a TCP/IP stack (bsdsocket.library) and AmiSSL 5 installed:
 
-    ACMailCheck imap.gmail.com 993 tls you@gmail.com S:token XOAUTH2
+    KyneMailCheck imap.gmail.com 993 tls you@gmail.com S:token XOAUTH2
 
-**Stacks:** a Shell gives a command 4 KB of stack, and the engine needs more: a TLS handshake alone runs deep. ACMail's programs swap to a 64 KB stack at start (`acm_run_with_stack`). An `acm_imap` is about 4.3 KB, so keep it on the heap.
+`KyneMailCheck HOST 993 tls - FILE` only connects and shows what the server offers, with each step (opening the stack and AmiSSL, resolving, connecting, the handshake) on its own line: a check of the network without signing in.
+
+**Stacks:** a Shell gives a command 4 KB of stack, and the engine needs more: a TLS handshake alone runs deep. KyneMail's programs swap to a 64 KB stack at start (`km_run_with_stack`). An `km_imap` is about 4.3 KB, so keep it on the heap.
