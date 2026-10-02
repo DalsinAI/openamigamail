@@ -5,6 +5,7 @@
 #include "acm_base64.h"
 #include "acm_imap.h"
 #include "acm_sasl.h"
+#include "acm_text.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -86,6 +87,71 @@ static void unit_mutf7(void)
         free(back);
     }
     free(s);
+}
+
+
+static void check_decode(const char *in, const char *want)
+{
+    char *s = acm_hdr_decode(in);
+    check_str(s, want, in);
+    free(s);
+}
+
+static void unit_text(void)
+{
+    static const char hdr[] = "Subject: Hello\r\n world\r\nFrom: =?UTF-8?Q?Galen_=E2=9C=A8?= <galen@example.com>\r\n"
+                              "To: \"Kirkwood, Dale\" <dale@example.com>, other@example.com\r\nX-Empty:\r\n\r\n";
+    char *s, *name, *addr;
+    long long when;
+    int zone;
+    s = acm_hdr_get(hdr, sizeof hdr - 1, "subject");
+    check_str(s, "Hello world", "a folded Subject");
+    free(s);
+    s = acm_hdr_get(hdr, sizeof hdr - 1, "X-Empty");
+    check_str(s, "", "an empty field");
+    free(s);
+    CHECK(!acm_hdr_get(hdr, sizeof hdr - 1, "Cc"), "a missing field is NULL");
+    /* expected values from Python's email.header */
+    check_decode("=?ISO-8859-1?Q?Gr=FC=DFe_aus_Amiga?=", "Gr\xc3\xbc\xc3\x9f" "e aus Amiga");
+    check_decode("=?UTF-8?B?4pyoIFNwYXJrbGU=?=", "\xe2\x9c\xa8 Sparkle");
+    check_decode("=?UTF-8?Q?a?= =?UTF-8?Q?b?=", "ab");
+    check_decode("x =?UTF-8?Q?a?= y", "x a y");
+    check_decode("=?windows-1252?Q?=93quoted=94_=80?=", "\xe2\x80\x9cquoted\xe2\x80\x9d \xe2\x82\xac");
+    check_decode("=?ISO-8859-2?Q?Za=BF=F3=B3=E6?=", "Za\xc5\xbc\xc3\xb3\xc5\x82\xc4\x87");
+    check_decode("=?utf-8*en?Q?language?=", "language");
+    check_decode("Gr\xfc\xdf" "e raw", "Gr\xc3\xbc\xc3\x9f" "e raw");          /* raw Latin-1 in a header */
+    check_decode("=?UTF-8?Q?not a word?=", "=?UTF-8?Q?not a word?=");           /* a space inside: left alone */
+    check_decode("Re: plain", "Re: plain");
+    s = acm_hdr_get(hdr, sizeof hdr - 1, "From");
+    CHECK(acm_hdr_address(s, &name, &addr), "From reads");
+    check_str(name, "Galen \xe2\x9c\xa8", "From's name");
+    check_str(addr, "galen@example.com", "From's address");
+    free(s); free(name); free(addr);
+    CHECK(acm_hdr_address("\"Kirkwood, Dale\" <dale@example.com>, other@example.com", &name, &addr), "a quoted name with a comma");
+    check_str(name, "Kirkwood, Dale", "quoted name");
+    check_str(addr, "dale@example.com", "its address");
+    free(name); free(addr);
+    CHECK(acm_hdr_address("thufir@example.com (Thufir Hawat)", &name, &addr), "a comment as the name");
+    check_str(name, "Thufir Hawat", "comment name");
+    check_str(addr, "thufir@example.com", "bare address");
+    free(name); free(addr);
+    CHECK(acm_hdr_address("<only@example.com>", &name, &addr), "angle brackets alone");
+    check_str(name, "", "no name");
+    check_str(addr, "only@example.com", "address in brackets");
+    free(name); free(addr);
+    CHECK(!acm_hdr_address("undisclosed-recipients:;", &name, &addr), "an empty group has no mailbox");
+    free(name); free(addr);
+    /* dates: values from Python's email.utils */
+    CHECK(acm_hdr_date("Thu, 02 Oct 2026 21:00:00 +0100", &when, &zone) && when == 1790971200LL && zone == 60, "RFC 5322 date: %lld %d", when, zone);
+    CHECK(acm_hdr_date("2 Oct 26 21:00 GMT", &when, &zone) && when == 1790974800LL && zone == 0, "two-digit year, GMT: %lld", when);
+    CHECK(acm_hdr_date("02-Oct-2026 21:01:00 +0100", &when, &zone) && when == 1790971260LL, "IMAP internal date: %lld", when);
+    CHECK(!acm_hdr_date("yesterday", &when, &zone), "nonsense is refused");
+    /* UTF-8 to the Amiga's Latin-1 */
+    s = acm_utf8_to_latin1("Gr\xc3\xbc\xc3\x9f" "e \xe2\x80\x9cq\xe2\x80\x9d \xe2\x80\x93 \xe2\x82\xac" "5\xe2\x80\xa6 Za\xc5\xbc\xc3\xb3\xc5\x82\xc4\x87 \xe2\x9c\xa8");
+    CHECK(!strcmp(s, "Gr\xfc\xdf" "e \"q\" - EUR5... Zaz\xf3lc ?"), "latin1: got \"%s\"", s);
+    free(s);
+    CHECK(acm_utf8_valid("\xef\xbf\xbd", 3), "a real U+FFFD is valid UTF-8");
+    CHECK(!acm_utf8_valid("\xc3", 1), "a cut sequence is not");
 }
 
 static void trace(void *user, int sent, const char *line)
@@ -182,6 +248,7 @@ int main(int argc, char **argv)
         unit_base64();
         unit_sasl();
         unit_mutf7();
+        unit_text();
     } else if (argc >= 4 && !strcmp(argv[1], "imap")) {
         imap_session(argv[2], atoi(argv[3]));
     } else {

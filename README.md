@@ -20,8 +20,8 @@ The engine meets the network only through `engine/acm_net.h`, so the same protoc
 | Step | State |
 | --- | --- |
 | 1. IMAP over TLS or STARTTLS: PLAIN, LOGIN and XOAUTH2 sign-in; folders; select; summaries; whole messages; flags | **Done, tested on the host** |
-| 2. Headers for people: RFC 2047 encoded words, character sets to UTF-8 and to the Amiga's Latin-1 | Next |
-| 3. The Amiga's network: bsdsocket.library and AmiSSL 5 (OS 3.x opens AmiSSL with `InitAmiSSLMaster`) | |
+| 2. Headers for people: fields, RFC 2047 encoded words, names and addresses, dates; seven charsets to UTF-8, and UTF-8 to the Amiga's Latin-1 | **Done, tested on the host** |
+| 3. The Amiga's network: bsdsocket.library and AmiSSL 5 (OS 3.x opens AmiSSL with `InitAmiSSLMaster`) | Next |
 | 4. The ReAction main window: folders, message list, plain-text reading | |
 | 5. SMTP and the compose window | |
 | 6. MIME: multipart, quoted-printable, base64, attachments | |
