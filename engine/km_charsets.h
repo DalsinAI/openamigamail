@@ -1,4 +1,4 @@
-/* acm_charsets.h: the upper halves of the 8-bit charsets acm_text knows (generated). */
+/* km_charsets.h: the upper halves of the 8-bit charsets km_text knows (generated). */
 static const unsigned short cs_8859_2[128] = {   /* 0x80-0xFF, generated from Python's iso8859_2 codec */
     0x0080, 0x0081, 0x0082, 0x0083, 0x0084, 0x0085, 0x0086, 0x0087,
     0x0088, 0x0089, 0x008a, 0x008b, 0x008c, 0x008d, 0x008e, 0x008f,

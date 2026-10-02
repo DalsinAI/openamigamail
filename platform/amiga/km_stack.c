@@ -1,4 +1,4 @@
-#include "acm_stack.h"
+#include "km_stack.h"
 
 #include <exec/memory.h>
 #include <exec/tasks.h>
@@ -17,7 +17,7 @@ static void __attribute__((noinline)) run_on_new_stack(void)
     StackSwap(&swap);
 }
 
-int acm_run_with_stack(unsigned long bytes, int (*fn)(int argc, char **argv), int argc, char **argv)
+int km_run_with_stack(unsigned long bytes, int (*fn)(int argc, char **argv), int argc, char **argv)
 {
     struct Task *me = FindTask(NULL);
     APTR mem;

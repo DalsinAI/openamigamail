@@ -1,8 +1,8 @@
-/* acm_net for the host (Linux, macOS): POSIX sockets and OpenSSL. It is
+/* km_net for the host (Linux, macOS): POSIX sockets and OpenSSL. It is
  * how the engine's tests run on the PC; the Amiga's is platform/amiga.
  * Certificates are checked against the system's store, or the file in
- * ACM_CA_FILE (the tests' own CA). */
-#include "acm_net.h"
+ * KM_CA_FILE (the tests' own CA). */
+#include "km_net.h"
 
 #include <errno.h>
 #include <netdb.h>
@@ -17,18 +17,20 @@
 #include <openssl/ssl.h>
 #include <openssl/x509v3.h>
 
-struct acm_conn {
+struct km_conn {
     int fd;
     SSL_CTX *ctx;
     SSL *ssl;
     char error[256];
 };
 
-int acm_net_init(char *err, size_t errlen) { (void)err; (void)errlen; return 1; }
+void (*km_net_progress)(const char *step);
 
-void acm_net_cleanup(void) {}
+int km_net_init(char *err, size_t errlen) { (void)err; (void)errlen; return 1; }
 
-void acm_net_set_timeout(acm_conn *c, int seconds)
+void km_net_cleanup(void) {}
+
+void km_net_set_timeout(km_conn *c, int seconds)
 {
     struct timeval tv;
     tv.tv_sec = seconds;
@@ -41,9 +43,9 @@ static void set_err(char *err, size_t errlen, const char *what)
     if (err && errlen) snprintf(err, errlen, "%s", what);
 }
 
-static int start_tls(acm_conn *c, const char *host, char *err, size_t errlen)
+static int start_tls(km_conn *c, const char *host, char *err, size_t errlen)
 {
-    const char *ca = getenv("ACM_CA_FILE");
+    const char *ca = getenv("KM_CA_FILE");
     long verify;
     c->ctx = SSL_CTX_new(TLS_client_method());
     if (!c->ctx) { set_err(err, errlen, "TLS could not be set up."); return 0; }
@@ -70,11 +72,11 @@ static int start_tls(acm_conn *c, const char *host, char *err, size_t errlen)
     return 1;
 }
 
-acm_conn *acm_net_connect(const char *host, int port, int tls, char *err, size_t errlen)
+km_conn *km_net_connect(const char *host, int port, int tls, char *err, size_t errlen)
 {
     struct addrinfo hints, *res = NULL, *ai;
     char portstr[16];
-    acm_conn *c = calloc(1, sizeof *c);
+    km_conn *c = calloc(1, sizeof *c);
     int rc;
     if (!c) { set_err(err, errlen, "Out of memory."); return NULL; }
     c->fd = -1;
@@ -105,17 +107,17 @@ acm_conn *acm_net_connect(const char *host, int port, int tls, char *err, size_t
         free(c);
         return NULL;
     }
-    if (tls && !start_tls(c, host, err, errlen)) { acm_net_close(c); return NULL; }
+    if (tls && !start_tls(c, host, err, errlen)) { km_net_close(c); return NULL; }
     return c;
 }
 
-int acm_net_starttls(acm_conn *c, const char *host, char *err, size_t errlen)
+int km_net_starttls(km_conn *c, const char *host, char *err, size_t errlen)
 {
     if (c->ssl) return 1;
     return start_tls(c, host, err, errlen);
 }
 
-long acm_net_read(acm_conn *c, void *buf, long len)
+long km_net_read(km_conn *c, void *buf, long len)
 {
     long n;
     if (c->ssl) {
@@ -133,7 +135,7 @@ long acm_net_read(acm_conn *c, void *buf, long len)
     return n;
 }
 
-long acm_net_write(acm_conn *c, const void *buf, long len)
+long km_net_write(km_conn *c, const void *buf, long len)
 {
     const char *p = buf;
     long left = len;
@@ -148,9 +150,9 @@ long acm_net_write(acm_conn *c, const void *buf, long len)
     return len;
 }
 
-const char *acm_net_error(acm_conn *c) { return c->error[0] ? c->error : "No error."; }
+const char *km_net_error(km_conn *c) { return c->error[0] ? c->error : "No error."; }
 
-void acm_net_close(acm_conn *c)
+void km_net_close(km_conn *c)
 {
     if (!c) return;
     if (c->ssl) { SSL_shutdown(c->ssl); SSL_free(c->ssl); }

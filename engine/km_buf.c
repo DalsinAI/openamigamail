@@ -1,17 +1,17 @@
-#include "acm_buf.h"
+#include "km_buf.h"
 
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-void acm_buf_init(acm_buf *b) { b->data = NULL; b->len = b->cap = 0; b->failed = 0; }
+void km_buf_init(km_buf *b) { b->data = NULL; b->len = b->cap = 0; b->failed = 0; }
 
-void acm_buf_free(acm_buf *b) { free(b->data); acm_buf_init(b); }
+void km_buf_free(km_buf *b) { free(b->data); km_buf_init(b); }
 
-void acm_buf_clear(acm_buf *b) { b->len = 0; if (b->data) b->data[0] = 0; b->failed = 0; }
+void km_buf_clear(km_buf *b) { b->len = 0; if (b->data) b->data[0] = 0; b->failed = 0; }
 
-static int grow(acm_buf *b, size_t need)
+static int grow(km_buf *b, size_t need)
 {
     size_t cap;
     char *p;
@@ -25,7 +25,7 @@ static int grow(acm_buf *b, size_t need)
     return 1;
 }
 
-int acm_buf_add(acm_buf *b, const void *p, size_t n)
+int km_buf_add(km_buf *b, const void *p, size_t n)
 {
     if (!grow(b, b->len + n)) return 0;
     if (n) memcpy(b->data + b->len, p, n);
@@ -34,11 +34,11 @@ int acm_buf_add(acm_buf *b, const void *p, size_t n)
     return 1;
 }
 
-int acm_buf_adds(acm_buf *b, const char *s) { return acm_buf_add(b, s, strlen(s)); }
+int km_buf_adds(km_buf *b, const char *s) { return km_buf_add(b, s, strlen(s)); }
 
-int acm_buf_addc(acm_buf *b, char c) { return acm_buf_add(b, &c, 1); }
+int km_buf_addc(km_buf *b, char c) { return km_buf_add(b, &c, 1); }
 
-int acm_buf_printf(acm_buf *b, const char *fmt, ...)
+int km_buf_printf(km_buf *b, const char *fmt, ...)
 {
     va_list ap;
     int n;
@@ -47,7 +47,7 @@ int acm_buf_printf(acm_buf *b, const char *fmt, ...)
     n = vsnprintf(small, sizeof small, fmt, ap);
     va_end(ap);
     if (n < 0) return 0;
-    if ((size_t)n < sizeof small) return acm_buf_add(b, small, (size_t)n);
+    if ((size_t)n < sizeof small) return km_buf_add(b, small, (size_t)n);
     if (!grow(b, b->len + (size_t)n)) return 0;
     va_start(ap, fmt);
     vsnprintf(b->data + b->len, (size_t)n + 1, fmt, ap);
@@ -56,12 +56,12 @@ int acm_buf_printf(acm_buf *b, const char *fmt, ...)
     return 1;
 }
 
-const char *acm_buf_str(const acm_buf *b) { return b->data ? b->data : ""; }
+const char *km_buf_str(const km_buf *b) { return b->data ? b->data : ""; }
 
-char *acm_buf_take(acm_buf *b)
+char *km_buf_take(km_buf *b)
 {
     char *s = b->data;
     if (!s) { s = malloc(1); if (s) s[0] = 0; }
-    acm_buf_init(b);
+    km_buf_init(b);
     return s;
 }
