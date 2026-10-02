@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 #include <openssl/err.h>
@@ -22,6 +23,18 @@ struct acm_conn {
     SSL *ssl;
     char error[256];
 };
+
+int acm_net_init(char *err, size_t errlen) { (void)err; (void)errlen; return 1; }
+
+void acm_net_cleanup(void) {}
+
+void acm_net_set_timeout(acm_conn *c, int seconds)
+{
+    struct timeval tv;
+    tv.tv_sec = seconds;
+    tv.tv_usec = 0;
+    setsockopt(c->fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv);
+}
 
 static void set_err(char *err, size_t errlen, const char *what)
 {

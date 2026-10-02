@@ -9,6 +9,14 @@
 
 typedef struct acm_conn acm_conn;
 
+/* Per task: on the Amiga, bsdsocket.library and AmiSSL belong to the task
+ * that opens them, so the task that talks to servers calls acm_net_init
+ * first and acm_net_cleanup at the end. 1 when the network is there. */
+int acm_net_init(char *err, size_t errlen);
+void acm_net_cleanup(void);
+/* how long a read waits for the server before giving up (seconds) */
+void acm_net_set_timeout(acm_conn *c, int seconds);
+
 /* tls: 1 to start TLS at once (IMAPS 993, SMTPS 465), 0 for a plain
  * connection that may be upgraded with acm_net_starttls */
 acm_conn *acm_net_connect(const char *host, int port, int tls, char *err, size_t errlen);
