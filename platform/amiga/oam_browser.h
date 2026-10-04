@@ -1,10 +1,10 @@
 /* oam_browser: opens a web address or a file in a browser (DESIGN.md 4).
  *
  * Tried in this order:
- *   1. ENV:OpenAmigaMail/Browser: a command, %s standing for the address;
+ *   1. ENV:OpenMail/Browser: a command, %s standing for the address;
  *   2. AmigaChrome's browser, on ARexx port AMIGACHROME.BROWSER, with
  *      OPENURL address or OPENFILE path (reserved for that browser: once it
- *      answers there, OpenAmigaMail uses it with no change);
+ *      answers there, OpenMail uses it with no change);
  *   3. openurl.library (OpenURL), which most Amiga browsers register with.
  * Sign-in pages (OAuth) and "View in browser" both come through here. */
 #ifndef OAM_BROWSER_H

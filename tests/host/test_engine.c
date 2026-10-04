@@ -1,4 +1,4 @@
-/* OpenAmigaMail engine tests on the host.
+/* OpenMail engine tests on the host.
  *   test_engine unit                 the engine's pieces on their own
  *   test_engine imap SCENARIO PORT   a session against fake_imapd.py
  * Exit 0 when every check passes; each failure is printed. */
@@ -104,7 +104,7 @@ static void check_decode(const char *in, const char *want)
 static void unit_provider(void)
 {
     static const char gmail[] =
-        "# Gmail, the way OpenAmigaMail ships it\n"
+        "# Gmail, the way OpenMail ships it\n"
         "name    = Gmail\n"
         "domains = gmail.com googlemail.com\n"
         "imap    = imap.gmail.com 993 tls\n"

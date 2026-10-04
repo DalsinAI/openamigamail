@@ -1,6 +1,6 @@
-# OpenAmigaMail: design
+# OpenMail: design
 
-OpenAmigaMail (KyneMail until 4 October 2026) is a full mail client for AmigaOS 3.2.3, and AROS 68k second.
+OpenMail (KyneMail, then OpenAmigaMail, until 4 October 2026) is a full mail client for AmigaOS 3.2.3, and AROS 68k second.
 
 Dale's requirements, 4 October 2026:
 - **A GadTools UI** for a full mail client, "as modern as possible".
@@ -69,14 +69,14 @@ Dale's requirements, 4 October 2026:
 - **Busy, never frozen:** the busy pointer, a status line, and Stop.
 - **Writing** happens in a compose window:
   - To, Cc and Subject are string gadgets.
-  - The body uses an editor drawn by OpenAmigaMail itself (GadTools has no multi-line gadget): typing, cursor keys, word wrap, scrolling, and paste through the clipboard.
+  - The body uses an editor drawn by OpenMail itself (GadTools has no multi-line gadget): typing, cursor keys, word wrap, scrolling, and paste through the clipboard.
   - "Edit in your editor" hands the text to `ENV:EDITOR` and takes it back.
   - Attach, Send and Save draft complete it.
 - **Accounts:** a window with a provider cycle (from the provider plugins), the address, a display name and the sign-in method. "Sign in..." runs the chosen auth plugin.
 
 ## 3. Plugins: providers and sign-in methods
 
-Two kinds of plugin, so anyone can add a mail service or a sign-in method without changing OpenAmigaMail itself.
+Two kinds of plugin, so anyone can add a mail service or a sign-in method without changing OpenMail itself.
 
 ### Providers: data files
 
@@ -91,7 +91,7 @@ auth      = xoauth2-browser password
 oauth.authorize = https://accounts.google.com/o/oauth2/v2/auth
 oauth.token     = https://oauth2.googleapis.com/token
 oauth.scope     = https://mail.google.com/
-oauth.client    = <OpenAmigaMail's registered client id>
+oauth.client    = <OpenMail's registered client id>
 note      = Google wants OAuth; an app password works for accounts with 2-step verification.
 ```
 
@@ -113,15 +113,15 @@ note      = Google wants OAuth; an app password works for accounts with 2-step v
 
 - **What the context brings:**
   - the account and the provider's keys;
-  - callbacks into OpenAmigaMail: an HTTPS POST (through the worker's TLS, so a plugin needs no network code), the secret store, the log, and the browser hook.
+  - callbacks into OpenMail: an HTTPS POST (through the worker's TLS, so a plugin needs no network code), the secret store, the log, and the browser hook.
 - **Built in, behind the same interface:**
   - `password` (PLAIN and LOGIN);
   - `xoauth2-device` (Microsoft's device-code flow, entirely on the Amiga);
   - `xoauth2-browser` (Google: the sign-in page opens through the browser hook, and the code comes back through AmigaChrome's host or a pasted code);
   - `xoauth2-token` (a token from a file, as KyneMailCheck took it).
-- **External `.auth` libraries** load the same way. That lets later methods (Yahoo's OAuth, a corporate SSO) be shipped apart from OpenAmigaMail.
+- **External `.auth` libraries** load the same way. That lets later methods (Yahoo's OAuth, a corporate SSO) be shipped apart from OpenMail.
 - **Secrets:**
-  - Refresh tokens and passwords are kept in `ENVARC:OpenAmigaMail/Secrets`.
+  - Refresh tokens and passwords are kept in `ENVARC:OpenMail/Secrets`.
   - They are obscured with a key unique to the machine. It is not strong encryption, and the settings say so: the Amiga has no key store.
   - Passwords are never written to the log or to a trace.
 
@@ -134,13 +134,13 @@ note      = Google wants OAuth; an app password works for accounts with 2-step v
   - links numbered [1] [2], with their addresses in "Links...";
   - images replaced by their alt text.
 
-  OpenAmigaMail fetches nothing from the network to show a message, so there are no tracking pixels.
-- **"View in browser"** writes the HTML part and its inline images (`cid:`) to `T:OpenAmigaMail/<uid>/` as files. It then hands `index.html` to the browser hook.
+  OpenMail fetches nothing from the network to show a message, so there are no tracking pixels.
+- **"View in browser"** writes the HTML part and its inline images (`cid:`) to `T:OpenMail/<uid>/` as files. It then hands `index.html` to the browser hook.
 - **The browser hook** (`include/oam_browser.h`) opens a URL or a file. It tries these in order:
-  1. `ENV:OpenAmigaMail/Browser`, a command with `%s` for the address, if the user set one;
-  2. AmigaChrome's browser, through its ARexx port. The name is reserved as `AMIGACHROME.BROWSER`, with the commands `OPENURL url` and `OPENFILE path`. That is the hook for "our website browser later": once that browser answers on the port, OpenAmigaMail uses it with no change;
+  1. `ENV:OpenMail/Browser`, a command with `%s` for the address, if the user set one;
+  2. AmigaChrome's browser, through its ARexx port. The name is reserved as `AMIGACHROME.BROWSER`, with the commands `OPENURL url` and `OPENFILE path`. That is the hook for "our website browser later": once that browser answers on the port, OpenMail uses it with no change;
   3. `openurl.library` (OpenURL), which most Amiga browsers register with;
-  4. none found: OpenAmigaMail says so and shows the address so it can be copied.
+  4. none found: OpenMail says so and shows the address so it can be copied.
 - **Sign-in pages** (OAuth) go through the same hook.
 
 ## 5. Milestones

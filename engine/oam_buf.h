@@ -1,5 +1,5 @@
 /* oam_buf: a growable byte buffer, always NUL-terminated so text can be
- * read straight out of it. OpenAmigaMail's engine is portable C: the same files
+ * read straight out of it. OpenMail's engine is portable C: the same files
  * build for AmigaOS 3.x, AROS and the host's tests. */
 #ifndef OAM_BUF_H
 #define OAM_BUF_H

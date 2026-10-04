@@ -1,5 +1,5 @@
 /*
- * OpenAmigaMail: the main window (DESIGN.md 2), GadTools.
+ * OpenMail: the main window (DESIGN.md 2), GadTools.
  *
  *   folders | messages
  *           | From / Subject / Date
@@ -41,9 +41,9 @@
 
 struct Library *GadToolsBase = NULL;      /* ours, not libnix's auto-open stub */
 
-#define VERSION_TEXT "OpenAmigaMail 0.2 (4.10.2026)"
+#define VERSION_TEXT "OpenMail 0.2 (4.10.2026)"
 static const char version[] __attribute__((used)) = "$VER: " VERSION_TEXT;
-#define ACCOUNT_FILE "ENV:OpenAmigaMail/Account"
+#define ACCOUNT_FILE "ENV:OpenMail/Account"
 
 enum { GID_GET = 1, GID_WRITE, GID_REPLY, GID_REPLYALL, GID_FORWARD, GID_DELETE,
        GID_FOLDERS, GID_MESSAGES, GID_FROM, GID_SUBJECT, GID_DATE, GID_BODY,
@@ -390,8 +390,8 @@ static void view_in_browser(void)
     char path[64], how[200];
     BPTR fh;
     if (!have_view || !view.has_html) return;
-    UnLock(CreateDir((STRPTR)"T:OpenAmigaMail"));
-    snprintf(path, sizeof path, "T:OpenAmigaMail/%lu.html", showing_uid);
+    UnLock(CreateDir((STRPTR)"T:OpenMail"));
+    snprintf(path, sizeof path, "T:OpenMail/%lu.html", showing_uid);
     if (!(fh = Open((STRPTR)path, MODE_NEWFILE))) { set_status("Could not write %s", path); return; }
     Write(fh, (APTR)"<meta charset=\"utf-8\">\n", 23);
     Write(fh, (APTR)oam_buf_str(&view.html), view.html.len);
@@ -593,7 +593,7 @@ static BOOL open_window(void)
     if ((menu = CreateMenus(menus, TAG_DONE))) LayoutMenus(menu, vi, GTMN_NewLookMenus, TRUE, TAG_DONE);
     w = scr->Width * 9 / 10;
     h = scr->Height * 8 / 10;
-    win = OpenWindowTags(NULL, WA_Title, (ULONG)"OpenAmigaMail", WA_ScreenTitle, (ULONG)VERSION_TEXT,
+    win = OpenWindowTags(NULL, WA_Title, (ULONG)"OpenMail", WA_ScreenTitle, (ULONG)VERSION_TEXT,
                          WA_PubScreen, (ULONG)scr, WA_Width, w, WA_Height, h,
                          WA_Left, (scr->Width - w) / 2, WA_Top, (scr->Height - h) / 2,
                          WA_MinWidth, cw * 70, WA_MinHeight, (fh + 6) * 14, WA_MaxWidth, ~0, WA_MaxHeight, ~0,
@@ -620,7 +620,7 @@ static void close_window(void)
 
 static void about(void)
 {
-    struct EasyStruct es = { sizeof(struct EasyStruct), 0, (UBYTE *)"OpenAmigaMail",
+    struct EasyStruct es = { sizeof(struct EasyStruct), 0, (UBYTE *)"OpenMail",
         (UBYTE *)VERSION_TEXT "\n\nMail for the Amiga. MIT licence,\nCopyright (c) 2026 Dalsin Limited.", (UBYTE *)"OK" };
     EasyRequestArgs(win, &es, NULL, NULL);
 }
@@ -715,7 +715,7 @@ static int load_account(char *err, size_t errlen)
     BPTR fh = Open((STRPTR)ACCOUNT_FILE, MODE_OLDFILE);
     LONG n;
     if (!fh) {
-        snprintf(err, errlen, "No account yet: OpenAmigaMail reads it from %s (the account window comes with M4)", ACCOUNT_FILE);
+        snprintf(err, errlen, "No account yet: OpenMail reads it from %s (the account window comes with M4)", ACCOUNT_FILE);
         return 0;
     }
     n = Read(fh, buf, sizeof buf - 1);
@@ -733,12 +733,12 @@ static int mail_main(int argc, char **argv)
     NewList(&message_rows.list);
     NewList(&body_rows.list);
     if (!(GadToolsBase = OpenLibrary((STRPTR)"gadtools.library", 39))) {
-        PutStr((STRPTR)"OpenAmigaMail needs AmigaOS 3.0 or later (gadtools.library 39)\n");
+        PutStr((STRPTR)"OpenMail needs AmigaOS 3.0 or later (gadtools.library 39)\n");
         return 20;
     }
     if (!(replies = CreateMsgPort())) { CloseLibrary(GadToolsBase); return 20; }
     if (!open_window()) {
-        PutStr((STRPTR)"OpenAmigaMail: the window could not open\n");
+        PutStr((STRPTR)"OpenMail: the window could not open\n");
         close_window();
         DeleteMsgPort(replies);
         CloseLibrary(GadToolsBase);

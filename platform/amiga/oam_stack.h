@@ -1,5 +1,5 @@
 /* oam_stack: run a program's main on a stack of its own size. A Shell
- * gives commands 4 KB unless told otherwise, and OpenAmigaMail needs more (a TLS
+ * gives commands 4 KB unless told otherwise, and OpenMail needs more (a TLS
  * handshake alone runs deep), so main swaps to a bigger stack with exec's
  * StackSwap when the one it was given is smaller. */
 #ifndef OAM_STACK_H
