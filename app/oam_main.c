@@ -8,7 +8,8 @@
  *
  * The window never talks to a server: the worker (oam_worker.c) does, and
  * the window waits for its answers alongside the user's input. This is M3:
- * reading. Writing, replying and the account window come next (M4).
+ * reading, with the account window (oam_accountwin.c). Writing and replying
+ * come next (M4).
  *
  * MIT, Copyright (c) 2026 Dalsin Limited.
  */
@@ -38,6 +39,7 @@
 #include "oam_worker.h"
 #include "oam_browser.h"
 #include "oam_stack.h"
+#include "oam_accountwin.h"
 
 struct Library *GadToolsBase = NULL;      /* ours, not libnix's auto-open stub */
 
@@ -48,13 +50,14 @@ static const char version[] __attribute__((used)) = "$VER: " VERSION_TEXT;
 enum { GID_GET = 1, GID_WRITE, GID_REPLY, GID_REPLYALL, GID_FORWARD, GID_DELETE,
        GID_FOLDERS, GID_MESSAGES, GID_FROM, GID_SUBJECT, GID_DATE, GID_BODY,
        GID_BROWSER, GID_LINKS, GID_STATUS, GID_COUNT };
-enum { M_ABOUT = 1, M_QUIT, M_GET, M_BROWSER, M_LINKS };
+enum { M_ABOUT = 1, M_QUIT, M_GET, M_BROWSER, M_LINKS, M_ACCOUNT };
 
 #define PAD 4
 #define MARGIN 6
 
 static struct NewMenu menus[] = {
     { NM_TITLE, "Project", NULL, 0, 0, NULL },
+    { NM_ITEM, "Account...", "A", 0, 0, (APTR)M_ACCOUNT },
     { NM_ITEM, "About...", NULL, 0, 0, (APTR)M_ABOUT },
     { NM_ITEM, NM_BARLABEL, NULL, 0, 0, NULL },
     { NM_ITEM, "Quit", "Q", 0, 0, (APTR)M_QUIT },
@@ -82,6 +85,7 @@ static BOOL quit_now;
 
 static oam_account account;
 static BOOL have_account, connected;
+static void account_menu(void);
 static char status[200] = "Starting...";
 
 /* A list a listview shows: nodes over Latin-1 strings, both ours. */
@@ -701,6 +705,7 @@ static void window_events(void)
                         case M_GET: do_command(GID_GET); break;
                         case M_BROWSER: do_command(GID_BROWSER); break;
                         case M_LINKS: do_command(GID_LINKS); break;
+                        case M_ACCOUNT: account_menu(); break;
                     }
                     code = item->NextSelect;
                 }
@@ -709,14 +714,22 @@ static void window_events(void)
     }
 }
 
+/* Project > Account...: change the account, then sign in with it. */
+static void account_menu(void)
+{
+    if (!oam_account_window(scr, vi, &font_attr, &account)) return;
+    have_account = TRUE;
+    connect_account();
+}
+
 static int load_account(char *err, size_t errlen)
 {
     static char buf[4096];
     BPTR fh = Open((STRPTR)ACCOUNT_FILE, MODE_OLDFILE);
     LONG n;
     if (!fh) {
-        snprintf(err, errlen, "No account yet: OpenMail reads it from %s (the account window comes with M4)", ACCOUNT_FILE);
-        return 0;
+        snprintf(err, errlen, "No account yet: choose Account... in the Project menu");
+        return -1;
     }
     n = Read(fh, buf, sizeof buf - 1);
     Close(fh);
@@ -746,10 +759,12 @@ static int mail_main(int argc, char **argv)
     }
     if (!oam_worker_start(err, sizeof err)) {
         set_status("No network: %s", err);
-    } else if (!(have_account = load_account(err, sizeof err))) {
-        set_status("%s", err);
     } else {
-        connect_account();
+        int got = load_account(err, sizeof err);
+        if (got < 0 && oam_account_window(scr, vi, &font_attr, &account)) got = 1;   /* first run: ask */
+        have_account = got > 0;
+        if (have_account) connect_account();
+        else set_status("%s", err);
     }
 
     while (!quit_now) {
