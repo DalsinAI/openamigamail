@@ -1,0 +1,6 @@
+name    = Yahoo Mail
+domains = yahoo.com yahoo.co.uk ymail.com
+imap    = imap.mail.yahoo.com 993 tls
+smtp    = smtp.mail.yahoo.com 465 tls
+auth    = password
+note    = Yahoo wants an app password, made in its account security settings.

@@ -6,6 +6,8 @@
 #include "oam_imap.h"
 #include "oam_sasl.h"
 #include "oam_text.h"
+#include "oam_provider.h"
+#include "oam_html.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -95,6 +97,66 @@ static void check_decode(const char *in, const char *want)
     char *s = oam_hdr_decode(in);
     check_str(s, want, in);
     free(s);
+}
+
+static void unit_provider(void)
+{
+    static const char gmail[] =
+        "# Gmail, the way OpenAmigaMail ships it\n"
+        "name    = Gmail\n"
+        "domains = gmail.com googlemail.com\n"
+        "imap    = imap.gmail.com 993 tls\n"
+        "smtp    = smtp.gmail.com 587 starttls\n"
+        "auth    = xoauth2-browser password\n"
+        "  oauth.token = https://oauth2.googleapis.com/token  \n"
+        "note = Two-step accounts can use an app password.\n";
+    oam_provider p;
+    char err[96];
+    CHECK(oam_provider_parse(gmail, &p, err, sizeof err), "provider parses: %s", err);
+    check_str(p.name, "Gmail", "provider name");
+    check_str(p.imap.host, "imap.gmail.com", "imap host");
+    CHECK(p.imap.port == 993 && p.imap.security == OAM_IMAP_TLS, "imap port and tls");
+    CHECK(p.smtp.port == 587 && p.smtp.security == OAM_IMAP_STARTTLS, "smtp starttls");
+    CHECK(p.nauth == 2 && !strcmp(p.auth[0], "xoauth2-browser"), "auth methods in order");
+    CHECK(oam_provider_has_auth(&p, "password") && !oam_provider_has_auth(&p, "xoauth2-device"), "has_auth");
+    check_str(oam_provider_get(&p, "oauth.token"), "https://oauth2.googleapis.com/token", "an extra key, trimmed");
+    CHECK(!oam_provider_get(&p, "oauth.scope"), "a missing key is NULL");
+    CHECK(oam_provider_matches(&p, "dale@gmail.com"), "matches its domain");
+    CHECK(oam_provider_matches(&p, "dale@GoogleMail.COM"), "matches without regard to case");
+    CHECK(oam_provider_matches(&p, "dale@mail.gmail.com"), "matches a subdomain");
+    CHECK(!oam_provider_matches(&p, "dale@notgmail.com"), "not another domain that ends the same");
+    CHECK(!oam_provider_matches(&p, "gmail.com"), "not without an @");
+    CHECK(!oam_provider_parse("name = X\nimap = host 993 maybe\nauth = password\n", &p, err, sizeof err) &&
+          strstr(err, "line 2"), "a bad security word is refused, with its line: %s", err);
+    CHECK(!oam_provider_parse("name = X\nauth = password\n", &p, err, sizeof err), "no imap server is refused");
+    CHECK(!oam_provider_parse("name = X\nimap = h 993 tls\njunk\n", &p, err, sizeof err), "a line without = is refused");
+}
+
+static void html_case(const char *html, const char *want_text, const char *want_links)
+{
+    oam_buf t, l;
+    oam_buf_init(&t);
+    oam_buf_init(&l);
+    CHECK(oam_html_to_text(html, strlen(html), &t, &l), "html converts");
+    check_str(oam_buf_str(&t), want_text, html);
+    check_str(oam_buf_str(&l), want_links, "links");
+    oam_buf_free(&t);
+    oam_buf_free(&l);
+}
+
+static void unit_html(void)
+{
+    html_case("<p>Hello <b>world</b></p><p>Second</p>", "Hello world\n\nSecond", "");
+    html_case("<html><head><title>T</title><style>p{x:1}</style></head><body>Hi<script>alert(1)</script> there</body></html>",
+              "Hi there", "");
+    html_case("Line one<br>Line   two<br/>\n  three", "Line one\nLine two\nthree", "");
+    html_case("<ul><li>apples</li><li>pears</li></ul>after", "- apples\n- pears\n\nafter", "");
+    html_case("See <a href=\"https://aminet.net/\">Aminet</a> and <a href='#top'>top</a>.",
+              "See Aminet [1] and top.", "https://aminet.net/\n");
+    html_case("Fish &amp; chips &lt;3 &#163;5 &#x20AC;2 &nbsp;&copy; &bogus;", "Fish & chips <3 \xc2\xa3" "5 \xe2\x82\xac" "2 \xc2\xa9 &bogus;", "");
+    html_case("<pre>a  b\n  c</pre>d", "a  b\n  c\n\nd", "");
+    html_case("<img src=\"cid:x\" alt=\"Logo\"> text<!-- hidden <b>x</b> -->", "[Logo] text", "");
+    html_case("<table><tr><td>A</td><td>B</td></tr><tr><td>C</td></tr></table>", "A B\nC", "");
 }
 
 static void unit_text(void)
@@ -242,6 +304,33 @@ done:
     return failures == start;
 }
 
+/* test_engine providers DIR: every .provider file in DIR parses. */
+#include <dirent.h>
+static void providers(const char *dir)
+{
+    DIR *d = opendir(dir);
+    struct dirent *e;
+    int seen = 0;
+    CHECK(d != NULL, "cannot open %s", dir);
+    while (d && (e = readdir(d))) {
+        char path[512], text[4096], err[96];
+        size_t n = strlen(e->d_name);
+        FILE *f;
+        oam_provider p;
+        if (n < 10 || strcmp(e->d_name + n - 9, ".provider")) continue;
+        snprintf(path, sizeof path, "%s/%s", dir, e->d_name);
+        f = fopen(path, "r");
+        n = f ? fread(text, 1, sizeof text - 1, f) : 0;
+        if (f) fclose(f);
+        text[n] = 0;
+        CHECK(oam_provider_parse(text, &p, err, sizeof err), "%s: %s", e->d_name, err);
+        CHECK(p.smtp.port != 0, "%s has no smtp server", e->d_name);
+        seen++;
+    }
+    if (d) closedir(d);
+    CHECK(seen >= 5, "only %d providers in %s", seen, dir);
+}
+
 int main(int argc, char **argv)
 {
     if (argc >= 2 && !strcmp(argv[1], "unit")) {
@@ -249,6 +338,10 @@ int main(int argc, char **argv)
         unit_sasl();
         unit_mutf7();
         unit_text();
+        unit_provider();
+        unit_html();
+    } else if (argc >= 3 && !strcmp(argv[1], "providers")) {
+        providers(argv[2]);
     } else if (argc >= 4 && !strcmp(argv[1], "imap")) {
         imap_session(argv[2], atoi(argv[3]));
     } else {

@@ -42,6 +42,7 @@ def main():
         ca, cert, key = certificates(d)
         env = dict(os.environ, OAM_CA_FILE=ca)
         failed = subprocess.run([exe, "unit"]).returncode != 0
+        failed = subprocess.run([exe, "providers", os.path.join(KM, "Providers")]).returncode != 0 or failed
         for sc in SCENARIOS:
             portfile = os.path.join(d, f"port-{sc}")
             srv = subprocess.Popen([sys.executable, os.path.join(HERE, "fake_imapd.py"), sc, portfile, cert, key])
