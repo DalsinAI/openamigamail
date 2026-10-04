@@ -2,7 +2,7 @@
 
 OpenMail (KyneMail, then OpenAmigaMail, until 4 October 2026) is a full mail client for AmigaOS 3.2.3, and AROS 68k second.
 
-Dale's requirements, 4 October 2026:
+Our requirements, 4 October 2026:
 - **A GadTools UI** for a full mail client, "as modern as possible".
 - **"Hooks for html linking into our website browser later."**
 - **"A plugin architecture for different mail providers / authentication methods."**
@@ -32,13 +32,12 @@ Dale's requirements, 4 October 2026:
 
 ## 2. The window: an Outlook-style desk (GadTools)
 
-Dale, 4 October 2026: "I'd like OpenMail to have a more Outlook feel: icons
+We, 4 October 2026: "I'd like OpenMail to have a more Outlook feel: icons
 for buttons, some features you would expect, a side panel for folders."
 And on sign-in: "really we want OpenMail to do this" (OAuth).
 
 **Mock-up:** the "OpenMail Desk" canvas,
-https://claude.ai/artifact/MMhp6SK1KAQVfG5jhdt1Uj (private to Dale until he
-shares it). It has four boards:
+https://claude.ai/artifact/MMhp6SK1KAQVfG5jhdt1Uj (private until we share it). It has four boards:
 - the desk in the Open theme;
 - writing a reply;
 - the Open theme, dark;
@@ -169,7 +168,7 @@ is busy, never frozen, as before.
 | Offline reading from the local store | M6 |
 | Contacts with completion; rules (filters); junk handling | M7 |
 | New-mail notice and checking every N minutes | M3b |
-| Microsoft sign-in (OAuth): "Sign in with Microsoft..." in Accounts; the engine is ready (device code), and with OpenBrowser the sign-in page opens inside it | When Dale gives the app registration's client ID |
+| Microsoft sign-in (OAuth): "Sign in with Microsoft..." in Accounts; the engine is ready (device code), and with OpenBrowser the sign-in page opens inside it | When we give the app registration's client ID |
 | Conversations (messages threaded by subject and references) | After M7 |
 
 **Keys** follow the menus' Amiga-key shortcuts:

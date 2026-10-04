@@ -123,10 +123,10 @@ static void unit_provider(void)
     CHECK(oam_provider_has_auth(&p, "password") && !oam_provider_has_auth(&p, "xoauth2-device"), "has_auth");
     check_str(oam_provider_get(&p, "oauth.token"), "https://oauth2.googleapis.com/token", "an extra key, trimmed");
     CHECK(!oam_provider_get(&p, "oauth.scope"), "a missing key is NULL");
-    CHECK(oam_provider_matches(&p, "dale@gmail.com"), "matches its domain");
-    CHECK(oam_provider_matches(&p, "dale@GoogleMail.COM"), "matches without regard to case");
-    CHECK(oam_provider_matches(&p, "dale@mail.gmail.com"), "matches a subdomain");
-    CHECK(!oam_provider_matches(&p, "dale@notgmail.com"), "not another domain that ends the same");
+    CHECK(oam_provider_matches(&p, "kim@gmail.com"), "matches its domain");
+    CHECK(oam_provider_matches(&p, "kim@GoogleMail.COM"), "matches without regard to case");
+    CHECK(oam_provider_matches(&p, "kim@mail.gmail.com"), "matches a subdomain");
+    CHECK(!oam_provider_matches(&p, "kim@notgmail.com"), "not another domain that ends the same");
     CHECK(!oam_provider_matches(&p, "gmail.com"), "not without an @");
     CHECK(!oam_provider_parse("name = X\nimap = host 993 maybe\nauth = password\n", &p, err, sizeof err) &&
           strstr(err, "line 2"), "a bad security word is refused, with its line: %s", err);
@@ -216,8 +216,8 @@ static void unit_account(void)
     oam_buf f;
     char err[96];
     memset(&a, 0, sizeof a);
-    strcpy(a.name, "Dale Kirkwood");
-    strcpy(a.address, "dale@example.com");
+    strcpy(a.name, "Kim Example");
+    strcpy(a.address, "kim@example.com");
     CHECK(oam_provider_parse("name = Example\nimap = imap.example.com 993 tls\nsmtp = smtp.example.com 587 starttls\n"
                              "auth = password xoauth2-device\n", &p, err, sizeof err), "provider: %s", err);
     oam_account_from_provider(&a, &p);
@@ -228,7 +228,7 @@ static void unit_account(void)
     CHECK(!strstr(oam_buf_str(&f), "w0rd"), "the password is not in the file as it is");
     CHECK(oam_account_parse(oam_buf_str(&f), &b, err, sizeof err), "parse: %s", err);
     check_str(b.secret, a.secret, "the secret comes back");
-    check_str(b.name, "Dale Kirkwood", "name");
+    check_str(b.name, "Kim Example", "name");
     check_str(b.provider, "Example", "provider");
     CHECK(b.imap.port == 993 && b.imap.security == OAM_IMAP_TLS && b.smtp.security == OAM_IMAP_STARTTLS, "servers");
     oam_buf_free(&f);
@@ -239,7 +239,7 @@ static void unit_account(void)
 static void unit_text(void)
 {
     static const char hdr[] = "Subject: Hello\r\n world\r\nFrom: =?UTF-8?Q?Galen_=E2=9C=A8?= <galen@example.com>\r\n"
-                              "To: \"Kirkwood, Dale\" <dale@example.com>, other@example.com\r\nX-Empty:\r\n\r\n";
+                              "To: \"Example, Kim\" <kim@example.com>, other@example.com\r\nX-Empty:\r\n\r\n";
     char *s, *name, *addr;
     long long when;
     int zone;
@@ -266,9 +266,9 @@ static void unit_text(void)
     check_str(name, "Galen \xe2\x9c\xa8", "From's name");
     check_str(addr, "galen@example.com", "From's address");
     free(s); free(name); free(addr);
-    CHECK(oam_hdr_address("\"Kirkwood, Dale\" <dale@example.com>, other@example.com", &name, &addr), "a quoted name with a comma");
-    check_str(name, "Kirkwood, Dale", "quoted name");
-    check_str(addr, "dale@example.com", "its address");
+    CHECK(oam_hdr_address("\"Example, Kim\" <kim@example.com>, other@example.com", &name, &addr), "a quoted name with a comma");
+    check_str(name, "Example, Kim", "quoted name");
+    check_str(addr, "kim@example.com", "its address");
     free(name); free(addr);
     CHECK(oam_hdr_address("thufir@example.com (Thufir Hawat)", &name, &addr), "a comment as the name");
     check_str(name, "Thufir Hawat", "comment name");
@@ -314,7 +314,7 @@ static int imap_session(const char *scenario, int port)
         goto done;
     }
     if (!strcmp(scenario, "xoauth2") || !strcmp(scenario, "xoauth2bad")) {
-        int ok = oam_imap_login_xoauth2(&m, "dale@example.com", "ya29.test-token");
+        int ok = oam_imap_login_xoauth2(&m, "kim@example.com", "ya29.test-token");
         if (!strcmp(scenario, "xoauth2bad")) {
             CHECK(!ok, "a refused token logs in");
             CHECK(strstr(oam_imap_error(&m), "AUTHENTICATIONFAILED") && strstr(oam_imap_error(&m), "\"status\":\"401\""),
@@ -323,7 +323,7 @@ static int imap_session(const char *scenario, int port)
             goto done;
         }
         CHECK(ok, "xoauth2 login: %s", oam_imap_error(&m));
-    } else CHECK(oam_imap_login(&m, "dale@example.com", "pa\"ss\\word"), "login: %s", oam_imap_error(&m));
+    } else CHECK(oam_imap_login(&m, "kim@example.com", "pa\"ss\\word"), "login: %s", oam_imap_error(&m));
     CHECK(oam_imap_has(&m, "MOVE"), "capabilities after login");
     {
         oam_imap_folder *f;

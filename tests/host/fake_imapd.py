@@ -17,7 +17,7 @@ Scenarios:
 """
 import base64, socket, ssl, sys
 
-USER, PASSWORD, TOKEN = "dale@example.com", 'pa"ss\\word', "ya29.test-token"
+USER, PASSWORD, TOKEN = "kim@example.com", 'pa"ss\\word', "ya29.test-token"
 
 HEADERS = [
     (b"Date: Thu, 02 Oct 2026 21:00:00 +0100\r\nFrom: =?UTF-8?Q?Galen_=E2=9C=A8?= <galen@example.com>\r\n"
@@ -98,7 +98,7 @@ class Session:
             self.send(f"{tag} OK [CAPABILITY {self.caps()}] logged in\r\n")
         elif sc == "login":
             tag, rest = self.expect("LOGIN ")
-            want = 'LOGIN "dale@example.com" "pa\\"ss\\\\word"'
+            want = 'LOGIN "kim@example.com" "pa\\"ss\\\\word"'
             if rest != want:
                 raise Fail(f"LOGIN was {rest!r}, wanted {want!r}")
             self.send(f"{tag} OK logged in\r\n")
