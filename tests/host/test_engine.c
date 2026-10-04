@@ -8,6 +8,7 @@
 #include "oam_text.h"
 #include "oam_provider.h"
 #include "oam_html.h"
+#include "oam_mime.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -157,6 +158,54 @@ static void unit_html(void)
     html_case("<pre>a  b\n  c</pre>d", "a  b\n  c\n\nd", "");
     html_case("<img src=\"cid:x\" alt=\"Logo\"> text<!-- hidden <b>x</b> -->", "[Logo] text", "");
     html_case("<table><tr><td>A</td><td>B</td></tr><tr><td>C</td></tr></table>", "A B\nC", "");
+}
+
+static void view_case(const char *msg, const char *want_text, const char *want_links, int want_html, int want_att, const char *what)
+{
+    oam_view v;
+    oam_view_init(&v);
+    CHECK(oam_mime_view(msg, strlen(msg), &v), "%s: view", what);
+    check_str(oam_buf_str(&v.text), want_text, what);
+    check_str(oam_buf_str(&v.links), want_links, what);
+    CHECK(v.has_html == want_html, "%s: has_html %d", what, v.has_html);
+    CHECK(v.attachments == want_att, "%s: attachments %d", what, v.attachments);
+    oam_view_free(&v);
+}
+
+static void unit_mime(void)
+{
+    view_case("Subject: x\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n"
+              "Caf=C3=A9 so=\r\nft break, see https://aminet.net/.\r\nLine two\r\n",
+              "Caf\xc3\xa9 soft break, see https://aminet.net/.\nLine two\n", "https://aminet.net/\n", 0, 0, "plain QP");
+    view_case("Content-Type: multipart/alternative; boundary=\"b1\"\n\nignored preamble\n--b1\nContent-Type: text/plain\n\nplain one\n"
+              "--b1\nContent-Type: text/html\n\n<p>html <a href=\"https://x.org\">one</a></p>\n--b1--\nepilogue\n",
+              "plain one", "", 1, 0, "alternative prefers the text");
+    view_case("Content-Type: multipart/alternative; boundary=b2\n\n--b2\nContent-Type: text/html; charset=iso-8859-1\n"
+              "Content-Transfer-Encoding: base64\n\nPHA+Q2Fm6TwvcD48cD48YSBocmVmPSJodHRwOi8veS5vcmciPnk8L2E+PC9wPg==\n--b2--\n",
+              "Caf\xc3\xa9\n\ny [1]", "http://y.org\n", 1, 0, "html only, base64, latin-1");
+    view_case("Content-Type: multipart/mixed; boundary=outer\n\n--outer\nContent-Type: multipart/alternative; boundary=inner\n\n"
+              "--inner\nContent-Type: text/plain\n\nnested text\n--inner--\n--outer\nContent-Type: application/pdf; name=\"a.pdf\"\n"
+              "Content-Disposition: attachment; filename*=utf-8''r%C3%A9sum%C3%A9.pdf\nContent-Transfer-Encoding: base64\n\nJVBERg==\n--outer\n"
+              "Content-Type: image/png\nContent-ID: <Logo1@x>\n\nPNG\n--outer--\n",
+              "nested text", "", 0, 1, "mixed: nested text, one attachment, an inline image");
+    view_case("Just a body\nwith no header\n", "Just a body\nwith no header\n", "", 0, 0, "not a message");
+    {   /* the attachment's name, decoded */
+        struct { char name[128]; char cid[128]; } got = { "", "" };
+        const char *m = "Content-Type: multipart/mixed; boundary=z\n\n--z\nContent-Type: application/pdf\n"
+                        "Content-Disposition: attachment; filename*=utf-8''r%C3%A9sum%C3%A9.pdf\n\nx\n--z\n"
+                        "Content-Type: image/png\nContent-ID: <Logo1@X>\n\ny\n--z--\n";
+        void cb(const oam_part *p, void *u);
+        oam_mime_walk(m, strlen(m), cb, &got);
+        check_str(got.name, "r\xc3\xa9sum\xc3\xa9.pdf", "RFC 2231 filename");
+        check_str(got.cid, "Logo1@X", "Content-ID keeps its case");
+    }
+}
+
+void cb(const oam_part *p, void *u)
+{
+    struct { char name[128]; char cid[128]; } *got = u;
+    if (p->filename[0]) snprintf(got->name, sizeof got->name, "%s", p->filename);
+    if (p->cid[0]) snprintf(got->cid, sizeof got->cid, "%s", p->cid);
 }
 
 static void unit_text(void)
@@ -340,6 +389,7 @@ int main(int argc, char **argv)
         unit_text();
         unit_provider();
         unit_html();
+        unit_mime();
     } else if (argc >= 3 && !strcmp(argv[1], "providers")) {
         providers(argv[2]);
     } else if (argc >= 4 && !strcmp(argv[1], "imap")) {
