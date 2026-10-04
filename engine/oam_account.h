@@ -10,8 +10,9 @@
  *     user     = dale@example.com
  *     secret   = <obscured>
  *
- * secret is the password (auth password) or the token file's path
- * (xoauth2-token). It is obscured, not encrypted: the Amiga has no key
+ * secret is the password (auth password), the token file's path
+ * (xoauth2-token) or the refresh token (xoauth2-device, with oauth_token,
+ * oauth_client and oauth_scope). It is obscured, not encrypted: the Amiga has no key
  * store, and the settings window says so. */
 #ifndef OAM_ACCOUNT_H
 #define OAM_ACCOUNT_H
@@ -27,7 +28,10 @@ typedef struct oam_account {
     oam_server imap, smtp;
     char auth[24];
     char user[128];         /* the login name; the address when empty */
-    char secret[256];       /* in the clear in memory, obscured in the file */
+    char secret[4096];      /* the password, or (xoauth2-device) the refresh token; clear in memory, obscured in the file */
+    char oauth_token[256];  /* xoauth2-device: the token address, client id and scope, from the provider */
+    char oauth_client[96];
+    char oauth_scope[256];
 } oam_account;
 
 int oam_account_parse(const char *text, oam_account *a, char *err, size_t errlen);

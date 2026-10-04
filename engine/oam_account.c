@@ -66,6 +66,9 @@ int oam_account_parse(const char *text, oam_account *a, char *err, size_t errlen
         else if (!strcmp(key, "provider")) copy(a->provider, sizeof a->provider, value);
         else if (!strcmp(key, "auth")) copy(a->auth, sizeof a->auth, value);
         else if (!strcmp(key, "user")) copy(a->user, sizeof a->user, value);
+        else if (!strcmp(key, "oauth_token")) copy(a->oauth_token, sizeof a->oauth_token, value);
+        else if (!strcmp(key, "oauth_client")) copy(a->oauth_client, sizeof a->oauth_client, value);
+        else if (!strcmp(key, "oauth_scope")) copy(a->oauth_scope, sizeof a->oauth_scope, value);
         else if (!strcmp(key, "imap") || !strcmp(key, "smtp")) {
             if (!server_text(value, key[0] == 'i' ? &a->imap : &a->smtp)) {
                 snprintf(err, errlen, "line %d: %s wants \"host port tls|starttls|plain\"", line, key);
@@ -101,6 +104,7 @@ int oam_account_format(const oam_account *a, oam_buf *out)
         oam_buf_printf(out, "smtp     = %s %d %s\n", a->smtp.host, a->smtp.port, security_word(a->smtp.security));
     oam_buf_printf(out, "auth     = %s\n", a->auth);
     if (a->user[0]) oam_buf_printf(out, "user     = %s\n", a->user);
+    if (a->oauth_token[0]) oam_buf_printf(out, "oauth_token  = %s\noauth_client = %s\noauth_scope  = %s\n", a->oauth_token, a->oauth_client, a->oauth_scope);
     if (n) {
         obscure(a->secret, n, mixed, 1);
         oam_buf_adds(out, "secret   = o1:");
