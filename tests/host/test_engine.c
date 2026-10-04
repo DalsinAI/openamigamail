@@ -9,6 +9,7 @@
 #include "oam_provider.h"
 #include "oam_html.h"
 #include "oam_mime.h"
+#include "oam_account.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -208,6 +209,33 @@ void cb(const oam_part *p, void *u)
     if (p->cid[0]) snprintf(got->cid, sizeof got->cid, "%s", p->cid);
 }
 
+static void unit_account(void)
+{
+    oam_account a, b;
+    oam_provider p;
+    oam_buf f;
+    char err[96];
+    memset(&a, 0, sizeof a);
+    strcpy(a.name, "Dale Kirkwood");
+    strcpy(a.address, "dale@example.com");
+    CHECK(oam_provider_parse("name = Example\nimap = imap.example.com 993 tls\nsmtp = smtp.example.com 587 starttls\n"
+                             "auth = password xoauth2-device\n", &p, err, sizeof err), "provider: %s", err);
+    oam_account_from_provider(&a, &p);
+    check_str(a.auth, "password", "the provider's first method");
+    strcpy(a.secret, "p\xc3\xa4ss = \"w0rd\"\\ #1");
+    oam_buf_init(&f);
+    CHECK(oam_account_format(&a, &f), "format");
+    CHECK(!strstr(oam_buf_str(&f), "w0rd"), "the password is not in the file as it is");
+    CHECK(oam_account_parse(oam_buf_str(&f), &b, err, sizeof err), "parse: %s", err);
+    check_str(b.secret, a.secret, "the secret comes back");
+    check_str(b.name, "Dale Kirkwood", "name");
+    check_str(b.provider, "Example", "provider");
+    CHECK(b.imap.port == 993 && b.imap.security == OAM_IMAP_TLS && b.smtp.security == OAM_IMAP_STARTTLS, "servers");
+    oam_buf_free(&f);
+    CHECK(!oam_account_parse("address = x@y\nimap = h 993 tls\nsecret = plain-text\n", &b, err, sizeof err), "an unmarked secret is refused");
+    CHECK(!oam_account_parse("name = x\n", &b, err, sizeof err), "no address is refused");
+}
+
 static void unit_text(void)
 {
     static const char hdr[] = "Subject: Hello\r\n world\r\nFrom: =?UTF-8?Q?Galen_=E2=9C=A8?= <galen@example.com>\r\n"
@@ -390,6 +418,7 @@ int main(int argc, char **argv)
         unit_provider();
         unit_html();
         unit_mime();
+        unit_account();
     } else if (argc >= 3 && !strcmp(argv[1], "providers")) {
         providers(argv[2]);
     } else if (argc >= 4 && !strcmp(argv[1], "imap")) {
