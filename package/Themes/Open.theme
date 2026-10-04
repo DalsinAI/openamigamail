@@ -1,0 +1,136 @@
+; OpenGadTools theme. MIT, Copyright (c) 2026 Dalsin Limited.
+; The format is THEME_SPEC.md (version 1). Checked by tools/check_themes.py.
+;
+; Open: steel-blue glass on cool grey, in the style of AmigaOS 4.1's look
+; (our own drawing; nothing taken from AmigaOS 4).
+
+name            Open
+description     "Steel-blue glass on cool grey (OS4-style)"
+version         1
+font            "DejaVu Sans" 12
+title.align     left
+
+[light]
+desktop                 #7f98be 0, #b9c8dc 60, #e2e8f0 100
+screenbar               #fdfdfe 0, #dde1e7 100
+screenbar.text          #1b2230
+screenbar.line          #98a1b0
+title.active            #7f97c2 0, #557299 18, #4d6a9b 48, #3f5b8b 52, #33497a 100
+title.active.text       #ffffff
+title.active.shadow     0 1 #0f1e3c 55
+title.inactive          #f5f6f8 0, #d2d6dd 100
+title.inactive.text     #4f5664
+title.inactive.shadow   none
+gadget.active           #f7f9fc 0, #cbd3e0 100
+gadget.active.border    #24324d
+gadget.active.glyph     #1f2a40
+gadget.inactive         #ffffff 0, #e2e5ea 100
+gadget.inactive.border  #9aa2af
+gadget.inactive.glyph   #6d7584
+gadget.radius           3
+frame.active            #3d4a63
+frame.inactive          #9aa2af
+frame.highlight         #ffffff
+window                  #e8eaee
+text                    #121825
+label                   #2a3342
+muted                   #5d6676
+button                  #ffffff 0, #d5dae2 100
+button.text             #121825
+button.border           #8a94a6
+button.highlight        #ffffff
+button.radius           4
+string                  #ffffff
+string.active           #ffffff
+string.shadow           #8a94a6
+string.shine            #c9cfd9
+string.radius           2
+accent                  #365fa3
+accent.text             #ffffff
+accent.mark             #365fa3
+fill                    #a4bde6 0, #7d9fd5 100
+fill.text               #121825
+selection.inactive      #cfdaee
+list                    #ffffff
+list.alternate          #f1f4f8
+list.header             #f7f8fa 0, #dde2e9 100
+group.line              #a3abb8
+group.highlight         #ffffff
+group.radius            5
+tab                     #e3e7ed 0, #cfd5de 100
+tab.text                #2a3342
+tab.radius              5
+track                   #cdd3dc
+menu                    #f6f7f9
+menu.text               #121825
+menu.line               #a3abb8
+icon.text               #121825
+icon.shadow             0 1 #ffffff 70
+shadow.active           0 10 24 #14233c 32
+shadow.inactive         0 6 16 #14233c 20
+
+[dark]
+desktop                 #121924 0, #33445e 100
+screenbar               #2c323c 0, #1d2129 100
+screenbar.text          #d7dde7
+screenbar.line          #0b0d11
+title.active            #7290c4 0, #4f6a9c 18, #4a6699 48, #3a5585 52, #2b416a 100
+title.active.text       #ffffff
+title.active.shadow     0 1 #000000 50
+title.inactive          #3a404a 0, #2b3038 100
+title.inactive.text     #a3abb9
+title.inactive.shadow   none
+gadget.active           #4a5363 0, #2f3540 100
+gadget.active.border    #0b0e13
+gadget.active.glyph     #e4e9f2
+gadget.inactive         #343a44 0, #2b3038 100
+gadget.inactive.border  #3e4552
+gadget.inactive.glyph   #8d96a6
+gadget.radius           3
+frame.active            #0b0e13
+frame.inactive          #1d2128
+frame.highlight         #353b45
+window                  #252a32
+text                    #e5e9f0
+label                   #bcc4d1
+muted                   #8f98a8
+button                  #434b58 0, #2c323b 100
+button.text             #eef1f6
+button.border           #5b667b
+button.highlight        #555d6a
+button.radius           4
+string                  #1a1e24
+string.active           #161a20
+string.shadow           #0c0e12
+string.shine            #4a5466
+string.radius           2
+accent                  #3d68ad
+accent.text             #ffffff
+accent.mark             #7aa2e0
+fill                    #4a75b8 0, #335c9c 100
+fill.text               #ffffff
+selection.inactive      #2c3d5c
+list                    #1d2127
+list.alternate          #22272e
+list.header             #39404b 0, #2b3039 100
+group.line              #0f1217
+group.highlight         #3c4452
+group.radius            5
+tab                     #333a46 0, #2a2f38 100
+tab.text                #bcc4d1
+tab.radius              5
+track                   #161a20
+menu                    #2b3039
+menu.text               #e5e9f0
+menu.line               #4a5466
+icon.text               #ffffff
+icon.shadow             0 1 #000000 100
+shadow.active           0 10 26 #000000 60
+shadow.inactive         0 6 16 #000000 45
+
+[four]
+; Pens 0 to 3: background, text and shadow, shine, fill.
+pens                    #c4cad3 #1b2130 #ffffff #4a6ea8
+title.active.fill       3
+title.active.text       2
+fill.text               2
