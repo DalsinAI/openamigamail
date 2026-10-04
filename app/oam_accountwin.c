@@ -181,7 +181,7 @@ int oam_account_window(struct Screen *scr, APTR vi, struct TextAttr *ta, oam_acc
         lw = TextLength(&rp, (STRPTR)"Password", 8) + 12;
     }
     row = fh + 8;
-    ww = cw * 62;
+    ww = cw * 70;
     memset(gad, 0, sizeof gad);
     snprintf(pw, sizeof pw, "%s", a->secret);
     pw_len = (int)strlen(pw);
@@ -205,8 +205,8 @@ int oam_account_window(struct Screen *scr, APTR vi, struct TextAttr *ta, oam_acc
     FIELD(G_ADDRESS, "_Address", STRING_KIND, GTST_String, (ULONG)a->address, GTST_MaxChars, sizeof a->address - 1, GT_Underscore, '_')
     FIELD(G_PASSWORD, "_Password", STRING_KIND, GTST_String, (ULONG)stars, GTST_MaxChars, sizeof pw - 1, GTST_EditHook, (ULONG)&pw_hook, GT_Underscore, '_')
     FIELD(G_PROVIDER, "Provider", TEXT_KIND, GTTX_Text, (ULONG)ptext, GTTX_Border, TRUE, GTTX_CopyText, TRUE)
-    FIELD(G_NOTE1, NULL, TEXT_KIND, GTTX_Text, (ULONG)line1, GTTX_CopyText, TRUE)
-    FIELD(G_NOTE2, NULL, TEXT_KIND, GTTX_Text, (ULONG)line2, GTTX_CopyText, TRUE)
+    FIELD(G_NOTE1, NULL, TEXT_KIND, GTTX_Text, (ULONG)line1, GTTX_CopyText, TRUE, GTTX_Clipped, TRUE)
+    FIELD(G_NOTE2, NULL, TEXT_KIND, GTTX_Text, (ULONG)line2, GTTX_CopyText, TRUE, GTTX_Clipped, TRUE)
 #undef FIELD
     y += 4;
     ng.ng_LeftEdge = scr->WBorLeft + 8; ng.ng_TopEdge = y; ng.ng_Width = cw * 12; ng.ng_Height = fh + 6;
