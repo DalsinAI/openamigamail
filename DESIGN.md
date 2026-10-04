@@ -30,49 +30,158 @@ Dale's requirements, 4 October 2026:
 - **Cancelling.** The window signals the worker with Ctrl-C. The engine's reads time out and check for the break.
 - **The engine stays portable C.** The host tests (a scripted IMAP server under ASan/UBSan) keep testing it unchanged.
 
-## 2. The window (GadTools)
+## 2. The window: an Outlook-style desk (GadTools)
+
+Dale, 4 October 2026: "I'd like OpenMail to have a more Outlook feel: icons
+for buttons, some features you would expect, a side panel for folders."
+And on sign-in: "really we want OpenMail to do this" (OAuth).
+
+**Mock-up:** the "OpenMail Desk" canvas,
+https://claude.ai/artifact/MMhp6SK1KAQVfG5jhdt1Uj (private to Dale until he
+shares it). It has four boards:
+- the desk in the Open theme;
+- writing a reply;
+- the Open theme, dark;
+- the Graphite theme.
+
+The colours are those of OpenGadTools' theme files, and every text colour
+on it meets 4.5:1.
 
 ```
-+--------------------------------------------------------------------------+
-| [Get mail] [Write] [Reply] [Reply all] [Forward] [Delete] [Search...]     |
-+-----------------+--------------------------------------------------------+
-| Folders         |   From                 Subject                  Date   |
-| > Inbox     12  | * Dale Kirkwood        OpenSocket is MIT        09:30  |
-|   Drafts        |   Galen                Phase 0 reviewed         Sat    |
-|   Sent          |   ...                                                  |
-|   Archive       +--------------------------------------------------------+
-|   Trash         | From: Dale Kirkwood <...>          Date: 4 Oct 09:30   |
-|                 | Subject: OpenSocket is MIT                             |
-|                 | -------------------------------------------------------|
-|                 | the message, as text; links are marked [1] [2]         |
-|                 |                                                        |
-|                 | [View in browser] [Links...] [Attachments (2)...]      |
-+-----------------+--------------------------------------------------------+
-| imap.gmail.com: 12 new. Getting Inbox...                       [Stop]    |
-+--------------------------------------------------------------------------+
++--------------------------------------------------------------------------------+
+| [New mail] | [Reply][Reply all][Forward] | [Delete][Archive][Junk][Move to] |   |
+|            |                             | [Flag][Unread] | [Get mail]  [Search mail]|
++--------------+---------------------------+-------------------------------------+
+| Favourites   | Inbox  Home  [All][Unread][Flagged]                             |
+|  Inbox    12 | Today                     | Re: OpenFiles tabs                  |
+|  Flagged   3 | | Jo Taylor    09:42 flag | (SR) Sam Rivers <sam@example.com>   |
+|  Drafts    1 | |  Saturday meet: who...  |      To: Kim Example   Today 07:58  |
+|  Sent        | |  I can bring the pro... |      [Reply] [Reply all] [Forward]  |
+| Home         |   Sam Rivers   07:58 clip | [tabs-test.iff 38 KB  Open  Save...]|
+|  Inbox    12 |   Re: OpenFiles tabs     | ----------------------------------- |
+|  ...         | Yesterday                 | Hi Kim, ...                         |
+| Club (Gmail) |   ...                     |                                     |
+| + New folder |                           |                                     |
+| [Mail][Contacts]                         |                                     |
++--------------+---------------------------+-------------------------------------+
+| Home: up to date | Club: getting mail [=====     ] Stop             12 unread  |
++--------------------------------------------------------------------------------+
 ```
 
-- **Three panes:** folders, the message list, and the message.
-- **Font-sensitive and resizable.** It lays out from the screen's font, and the panes keep their proportions.
-- **The message list** is a GadTools listview with a render hook (`GTLV_CallBack`, V39). It draws:
-  - columns aligned in any font;
-  - unread mail in bold, flagged mail marked;
-  - the selected row in the screen's fill colour.
+### The toolbar
 
-  On V37 the list is plain text in columns.
-- **The message** is a read-only listview of wrapped lines. Its header is a few text gadgets above it.
-- **Menus** (new look, with Amiga-key shortcuts):
-  - Project: Accounts, Settings, About, Quit.
-  - Mailbox: Get mail, New folder, Rename, Delete.
-  - Message: Write, Reply, Reply all, Forward, Delete, Mark read/unread, Flag, View source, View in browser.
-- **Keys:** cursor up and down move in the list, Return opens a message, Del deletes it, and the underlined letters press buttons.
-- **Busy, never frozen:** the busy pointer, a status line, and Stop.
-- **Writing** happens in a compose window:
-  - To, Cc and Subject are string gadgets.
-  - The body uses an editor drawn by OpenMail itself (GadTools has no multi-line gadget): typing, cursor keys, word wrap, scrolling, and paste through the clipboard.
-  - "Edit in your editor" hands the text to `ENV:EDITOR` and takes it back.
-  - Attach, Send and Save draft complete it.
-- **Accounts:** a window with a provider cycle (from the provider plugins), the address, a display name and the sign-in method. "Sign in..." runs the chosen auth plugin.
+- **Icons with their names under them,** following the common rules of
+  OpenGadTools section 0. A setting chooses icons and text (the default),
+  icons only, or text only, and help bubbles name every icon.
+- **The groups:**
+  - New mail;
+  - Reply, Reply all, Forward;
+  - Delete, Archive, Junk, Move to;
+  - Flag, Unread;
+  - Get mail.
+  - The search field sits on the right.
+- **The icons** are 24 x 24 in the OS 3.2 (GlowIcons) style, drawn for
+  OpenMail.
+- **How they're built:** until OpenGadTools' image buttons exist, each one is
+  Intuition's `frbuttonclass` with our image, in the GadTools window.
+
+### The folder side panel
+
+- **Favourites first:** Inbox, Flagged, Drafts and Sent across every
+  account. Its Inbox is the unified inbox.
+- **Then each account** with its folders as a tree:
+  - indented sub-folders;
+  - the unread count beside each folder (the Inbox's bold, in the accent
+    colour);
+  - each section folds away.
+- **The account name** shows its provider (Home, Outlook.com; Club, Gmail).
+- **Drag messages onto a folder** to move them (with Shift, to copy). "+ New
+  folder" is at the foot.
+- **A Mail / Contacts switch** sits at the bottom. Contacts is the address
+  book of M7.
+- **The panel's width** is adjustable, and it can be hidden.
+
+### The message list
+
+- **The header:**
+  - the folder's name and its account;
+  - All, Unread and Flagged filters;
+  - sorting (by date, the default; sender; subject; size).
+- **Each message takes three lines:**
+  - the sender, with marks for an attachment and a flag, and the time;
+  - the subject;
+  - a one-line preview.
+- **Messages are grouped by date:** Today, Yesterday, Earlier this week, Last
+  week, Older.
+- **Unread mail** has a bar in the accent colour, a bold sender, and the
+  subject bold in the accent colour.
+  - **The selected message** has a soft accent fill.
+- **How it's built:** a GadTools listview with `GTLV_ItemHeight` and a render
+  hook (`GTLV_CallBack`, V39), until OpenGadTools' list class takes over.
+
+### The reading pane
+
+- **Where:** on the right by default; below the list, or off, is a setting.
+- **What it shows:**
+  - the subject;
+  - the sender's initials in a circle, their name and address, the
+    recipients and the date;
+  - Reply, Reply all and Forward beside them;
+  - **attachments as chips:** a picture, the name, the size, **Open**
+    (OpenView, through datatypes) and **Save...**.
+- **Pictures from the internet** stay blocked until "Show pictures" is
+  pressed, for privacy. Links open in OpenBrowser.
+
+### The status bar
+
+Each account's state, a progress gauge with Stop, and the unread count. It
+is busy, never frozen, as before.
+
+### Writing
+
+**The compose window has the same look.**
+- **The toolbar:** Send (in the accent colour), Attach, Signature, Priority,
+  Save draft and Discard.
+- **The fields:**
+  - From is a cycle of the accounts;
+  - To shows recipients as chips, completed from Contacts;
+  - Cc and Bcc on request;
+  - Subject.
+- **The editor** is OpenMail's own, as designed; GadTools has no multi-line
+  gadget.
+- **Under it:** "Plain text. Draft saved 08:12" and **Edit in your editor**
+  (`ENV:EDITOR`).
+- **Files dropped on the window** from Workbench become attachments (it's an
+  AppWindow).
+
+### The features you'd expect
+
+| Feature | When |
+| --- | --- |
+| The desk above: icon toolbar, folder side panel, three-line list grouped by date, reading pane | M3b |
+| Unified inbox (Favourites) and unread counts | M3b |
+| Quick filter in the folder (sender and subject) | M3b |
+| Search on the server (IMAP SEARCH) | M7 |
+| Flags and read state, synced both ways | M6 |
+| Move, copy and delete by dragging | M3b (IMAP MOVE and COPY) |
+| Compose, reply, forward; drafts saved as you type; signatures per account | M4 |
+| Attachments both ways, opened through OpenView | M5 |
+| Offline reading from the local store | M6 |
+| Contacts with completion; rules (filters); junk handling | M7 |
+| New-mail notice and checking every N minutes | M3b |
+| Microsoft sign-in (OAuth): "Sign in with Microsoft..." in Accounts; the engine is ready (device code), and with OpenBrowser the sign-in page opens inside it | When Dale gives the app registration's client ID |
+| Conversations (messages threaded by subject and references) | After M7 |
+
+**Keys** follow the menus' Amiga-key shortcuts:
+- Right Amiga+N new mail, Right Amiga+R reply, Shift+Right Amiga+R reply
+  all;
+- Right Amiga+G get mail;
+- Del deletes;
+- cursor keys move in the list, and Return opens a message.
+
+**Themes:** OpenMail follows OpenGadTools' theme. Open, the OS 4-style theme,
+is the closest to Outlook's feel. Until the look patch ships, it draws in
+the Classic look with the same layout.
 
 ## 3. Plugins: providers and sign-in methods
 
@@ -149,7 +258,8 @@ note      = Google wants OAuth; an app password works for accounts with 2-step v
 | --- | --- | --- |
 | M1-M2 | IMAP engine; Amiga network (KyneMail, 2 Oct) | Done |
 | **M3** | The GadTools main window, read-only: worker, accounts from providers, folders, message list, reading text and HTML, the browser hook | It reads Gmail and Outlook on OS 3.2.3 over OpenSocket |
-| M4 | SMTP and the compose window | Sending, replying, forwarding |
+| **M3b** | The Outlook-style desk (section 2): icon toolbar, folder side panel with Favourites and unread counts, the three-line list grouped by date, the reading pane with attachment chips, quick filter, moving by drag and drop, new-mail notice | The desk of the mock-up, working on OS 3.2.3 against Gmail and Outlook.com |
+| M4 | SMTP and the compose window, in the same look | Sending, replying, forwarding |
 | M5 | MIME: multipart, attachments, charsets, quoted-printable and base64 both ways | Real-world mail reads and sends correctly |
 | M6 | The local store: a cache per folder, offline reading, flags synced | It opens without the network |
 | M7 | Search, filters, an address book; external `.auth` libraries | |
