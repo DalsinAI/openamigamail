@@ -1,0 +1,6 @@
+name    = iCloud Mail
+domains = icloud.com me.com mac.com
+imap    = imap.mail.me.com 993 tls
+smtp    = smtp.mail.me.com 587 starttls
+auth    = password
+note    = Apple wants an app-specific password, made at appleid.apple.com.
