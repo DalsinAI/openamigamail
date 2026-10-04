@@ -1,8 +1,8 @@
-#include "km_base64.h"
+#include "oam_base64.h"
 
 static const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-int km_base64_encode(km_buf *out, const void *data, size_t len)
+int oam_base64_encode(oam_buf *out, const void *data, size_t len)
 {
     const unsigned char *p = data;
     char q[4];
@@ -12,19 +12,19 @@ int km_base64_encode(km_buf *out, const void *data, size_t len)
         q[1] = alphabet[(p[i] & 3) << 4 | p[i + 1] >> 4];
         q[2] = alphabet[(p[i + 1] & 15) << 2 | p[i + 2] >> 6];
         q[3] = alphabet[p[i + 2] & 63];
-        if (!km_buf_add(out, q, 4)) return 0;
+        if (!oam_buf_add(out, q, 4)) return 0;
     }
     if (len - i == 1) {
         q[0] = alphabet[p[i] >> 2];
         q[1] = alphabet[(p[i] & 3) << 4];
         q[2] = q[3] = '=';
-        if (!km_buf_add(out, q, 4)) return 0;
+        if (!oam_buf_add(out, q, 4)) return 0;
     } else if (len - i == 2) {
         q[0] = alphabet[p[i] >> 2];
         q[1] = alphabet[(p[i] & 3) << 4 | p[i + 1] >> 4];
         q[2] = alphabet[(p[i + 1] & 15) << 2];
         q[3] = '=';
-        if (!km_buf_add(out, q, 4)) return 0;
+        if (!oam_buf_add(out, q, 4)) return 0;
     }
     return 1;
 }
@@ -39,7 +39,7 @@ static int value(char c)
     return -1;
 }
 
-int km_base64_decode(km_buf *out, const char *text, size_t len)
+int oam_base64_decode(oam_buf *out, const char *text, size_t len)
 {
     unsigned long acc = 0;
     int bits = 0;
@@ -55,7 +55,7 @@ int km_base64_decode(km_buf *out, const char *text, size_t len)
         bits += 6;
         if (bits >= 8) {
             bits -= 8;
-            if (!km_buf_addc(out, (char)(acc >> bits & 0xff))) return 0;
+            if (!oam_buf_addc(out, (char)(acc >> bits & 0xff))) return 0;
         }
     }
     return 1;
