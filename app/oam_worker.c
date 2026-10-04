@@ -156,7 +156,7 @@ int oam_worker_start(char *err, size_t errlen)
     parent = FindTask(NULL);
     if ((ready_sig = AllocSignal(-1)) < 0) { snprintf(err, errlen, "no free signal"); return 0; }
     SetSignal(0, 1UL << ready_sig);
-    if (!CreateNewProcTags(NP_Entry, (ULONG)worker_entry, NP_Name, (ULONG)"OpenAmigaMail network",
+    if (!CreateNewProcTags(NP_Entry, (ULONG)worker_entry, NP_Name, (ULONG)"OpenMail network",
                            NP_StackSize, 65536, NP_Priority, 0, TAG_DONE)) {
         snprintf(err, errlen, "the network process could not start");
         FreeSignal(ready_sig);

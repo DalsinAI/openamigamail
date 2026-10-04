@@ -1,8 +1,8 @@
-/* OpenAmigaMailCheck: signs in to an IMAP server, lists its folders and the
+/* OpenMailCheck: signs in to an IMAP server, lists its folders and the
  * newest subjects in INBOX. The engine's first run on a real Amiga, and a
  * check of an account's settings. Builds for the host too.
  *
- *   OpenAmigaMailCheck HOST PORT SECURITY USER SECRETFILE [XOAUTH2]
+ *   OpenMailCheck HOST PORT SECURITY USER SECRETFILE [XOAUTH2]
  *     SECURITY   tls, starttls or plain
  *     SECRETFILE a file holding the password, or the OAuth access token
  *                with XOAUTH2 (so no secret appears on the command line)
@@ -20,7 +20,7 @@
 #include <string.h>
 
 #ifdef __amigaos__
-static const char version[] __attribute__((used)) = "$VER: OpenAmigaMailCheck 0.1 (4.10.2026)";
+static const char version[] __attribute__((used)) = "$VER: OpenMailCheck 0.1 (4.10.2026)";
 #endif
 
 static void progress(const char *step) { printf("  ... %s\n", step); }
@@ -61,18 +61,18 @@ static int check(int argc, char **argv)
     oam_imap_msg *msgs;
     int nf, nm, i, security, xoauth2, ok, rc = 10;
     char *secret, err[200];
-    int steps = getenv("OPENAMIGAMAIL_STEPS") != NULL;
+    int steps = getenv("OPENMAIL_STEPS") != NULL;
     setvbuf(stdout, NULL, _IONBF, 0);       /* every line out at once: a crash still leaves what came before */
     if (argc < 6) {
-        printf("usage: OpenAmigaMailCheck HOST PORT tls|starttls|plain USER SECRETFILE [XOAUTH2]\n");
+        printf("usage: OpenMailCheck HOST PORT tls|starttls|plain USER SECRETFILE [XOAUTH2]\n");
         return 20;
     }
     security = !strcmp(argv[3], "tls") ? OAM_IMAP_TLS : !strcmp(argv[3], "starttls") ? OAM_IMAP_STARTTLS : OAM_IMAP_PLAIN;
     xoauth2 = argc > 6 && !strcmp(argv[6], "XOAUTH2");
-    if (!(secret = read_secret(argv[5]))) { printf("OpenAmigaMailCheck: %s could not be read\n", argv[5]); return 20; }
+    if (!(secret = read_secret(argv[5]))) { printf("OpenMailCheck: %s could not be read\n", argv[5]); return 20; }
     if (steps || !strcmp(argv[4], "-")) oam_net_progress = progress;      /* a probe shows each step */
-    if (!oam_net_init(err, sizeof err)) { printf("OpenAmigaMailCheck: %s\n", err); free(secret); return 20; }
-    if (!(m = calloc(1, sizeof *m))) { printf("OpenAmigaMailCheck: out of memory\n"); free(secret); oam_net_cleanup(); return 20; }
+    if (!oam_net_init(err, sizeof err)) { printf("OpenMailCheck: %s\n", err); free(secret); return 20; }
+    if (!(m = calloc(1, sizeof *m))) { printf("OpenMailCheck: out of memory\n"); free(secret); oam_net_cleanup(); return 20; }
     oam_imap_init(m);
     printf("Connecting to %s:%s (%s)...\n", argv[1], argv[2], argv[3]);
     if (!oam_imap_connect(m, argv[1], atoi(argv[2]), security)) { printf("Failed: %s\n", oam_imap_error(m)); goto out; }

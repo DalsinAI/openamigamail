@@ -64,7 +64,7 @@ int oam_net_init(char *err, size_t errlen)
                        AmiSSL_ErrNoPtr, (ULONG)&errno,
                        TAG_DONE) != 0) {
         AmiSSLBase = NULL;
-        set_err(err, errlen, "AmiSSL could not be opened: it may be older than OpenAmigaMail needs.");
+        set_err(err, errlen, "AmiSSL could not be opened: it may be older than OpenMail needs.");
         oam_net_cleanup();
         return 0;
     }
