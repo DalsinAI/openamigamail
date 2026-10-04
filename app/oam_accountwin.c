@@ -143,20 +143,21 @@ static int describe(const char *address, oam_provider *p, int *found, char *line
         return 0;
     }
     if (!*found) {
-        snprintf(line1, size, "No provider file matches this address yet.");
-        snprintf(line2, size, "Gmail, Yahoo, iCloud and Fastmail work today; more are coming.");
+        snprintf(line1, size, "OpenMail doesn't know this provider yet.");
+        snprintf(line2, size, "Gmail, Yahoo, iCloud and Fastmail work today.");
         return 0;
     }
     if (!oam_provider_has_auth(p, "password")) {
-        snprintf(line1, size, "%s needs its own sign-in (OAuth), which is coming soon.", p->name);
+        snprintf(line1, size, "%s needs Microsoft's own sign-in (OAuth), not a password.", p->name);
+        snprintf(line2, size, "That comes once OpenMail is registered. Gmail works today.");
         return 0;
     }
     if (!strcmp(p->name, "Gmail")) {
-        snprintf(line1, size, "Use an app password: Google Account, Security, App passwords.");
+        snprintf(line1, size, "Use a Google app password (Security, App passwords).");
         snprintf(line2, size, "It is kept obscured on this Amiga, not encrypted.");
     } else {
-        snprintf(line1, size, "Your password is kept obscured on this Amiga, not encrypted.");
-        snprintf(line2, size, "Some providers ask for an app password instead of your usual one.");
+        snprintf(line1, size, "Some providers want an app password, not your usual one.");
+        snprintf(line2, size, "It is kept obscured on this Amiga, not encrypted.");
     }
     return 1;
 }
@@ -181,7 +182,22 @@ int oam_account_window(struct Screen *scr, APTR vi, struct TextAttr *ta, oam_acc
         lw = TextLength(&rp, (STRPTR)"Password", 8) + 12;
     }
     row = fh + 8;
-    ww = cw * 70;
+    {
+        static const char *longest[] = {
+            "Outlook.com needs Microsoft's own sign-in (OAuth), not a password.",
+            "That comes once OpenMail is registered. Gmail works today.",
+            "Some providers want an app password, not your usual one.",
+            "Type your mail address, and OpenMail finds its servers." };
+        struct RastPort rp;
+        InitRastPort(&rp);
+        SetFont(&rp, font);
+        ww = cw * 40;
+        for (int i = 0; i < 4; i++) {
+            int t = lw + TextLength(&rp, (STRPTR)longest[i], strlen(longest[i])) + 16;
+            if (t > ww) ww = t;
+        }
+        if (ww > scr->Width - scr->WBorLeft - scr->WBorRight - 40) ww = scr->Width - scr->WBorLeft - scr->WBorRight - 40;
+    }
     memset(gad, 0, sizeof gad);
     snprintf(pw, sizeof pw, "%s", a->secret);
     pw_len = (int)strlen(pw);
