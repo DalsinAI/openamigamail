@@ -1,0 +1,136 @@
+; OpenGadTools theme. MIT, Copyright (c) 2026 Dalsin Limited.
+; The format is THEME_SPEC.md (version 1). Checked by tools/check_themes.py.
+;
+; Graphite: graphite and chrome on a light steel desktop, in the style of
+; AmiKit X13's look (our own drawing; nothing taken from AmiKit).
+
+name            Graphite
+description     "Graphite and chrome (AmiKit-style)"
+version         1
+font            "DejaVu Sans" 12
+title.align     centre
+
+[light]
+desktop                 radial #f1f2f3 0, #aeb1b6 100
+screenbar               #f6f7f8 0, #cfd2d6 100
+screenbar.text          #1d1f22
+screenbar.line          #8a8e94
+title.active            #a9acb1 0, #6e7177 15, #64676d 45, #45484e 55, #2f3237 100
+title.active.text       #ffffff
+title.active.shadow     1 1 #000000 70
+title.inactive          #e2e4e6 0, #b3b6ba 100
+title.inactive.text     #2b2e32
+title.inactive.shadow   0 1 #ffffff 50
+gadget.active           none
+gadget.active.border    #c9cbce
+gadget.active.glyph     #f4f5f6
+gadget.inactive         none
+gadget.inactive.border  #9a9da2
+gadget.inactive.glyph   #3a3d42
+gadget.radius           2
+frame.active            #26282c
+frame.inactive          #74787d
+frame.highlight         #eef0f1
+window                  #cbcdd0
+text                    #141619
+label                   #2b2e32
+muted                   #555960
+button                  #7a7e84 0, #46494e 47, #2b2d31 53, #3f4247 100
+button.text             #f6f7f8
+button.border           #1b1d20
+button.highlight        #a9acb0
+button.radius           3
+string                  #eef0f1
+string.active           #ffffff
+string.shadow           #6b6f75
+string.shine            #f8f9fa
+string.radius           2
+accent                  #2e7d1c
+accent.text             #ffffff
+accent.mark             #2e7d1c
+fill                    #6cc24e 0, #4a9e32 100
+fill.text               #141619
+selection.inactive      #c3dcb9
+list                    #f0f1f2
+list.alternate          #e4e6e9
+list.header             #e6e8ea 0, #c4c7cb 100
+group.line              #8c9096
+group.highlight         #eef0f1
+group.radius            3
+tab                     #bcbfc3 0, #a5a8ad 100
+tab.text                #2b2e32
+tab.radius              3
+track                   #a9acb1
+menu                    #eceef0
+menu.text               #15171a
+menu.line               #8a8e94
+icon.text               #15171a
+icon.shadow             0 1 #ffffff 85
+shadow.active           0 10 24 #14161a 35
+shadow.inactive         0 6 16 #14161a 22
+
+[dark]
+desktop                 radial #44474c 0, #141518 100
+screenbar               #34363a 0, #1e2023 100
+screenbar.text          #dcdee1
+screenbar.line          #0c0d0f
+title.active            #8a8e94 0, #5c5f65 15, #55585e 45, #303236 55, #1f2124 100
+title.active.text       #ffffff
+title.active.shadow     1 1 #000000 80
+title.inactive          #3c3f43 0, #2a2c30 100
+title.inactive.text     #aeb2b8
+title.inactive.shadow   none
+gadget.active           none
+gadget.active.border    #8a8d92
+gadget.active.glyph     #f4f5f6
+gadget.inactive         none
+gadget.inactive.border  #45484d
+gadget.inactive.glyph   #8f9399
+gadget.radius           2
+frame.active            #000000
+frame.inactive          #2f3135
+frame.highlight         #3d4044
+window                  #2b2d31
+text                    #e6e8eb
+label                   #c2c6cb
+muted                   #9a9ea4
+button                  #62666c 0, #3a3d42 47, #232528 53, #2f3236 100
+button.text             #f2f3f5
+button.border           #0b0c0d
+button.highlight        #7d8085
+button.radius           3
+string                  #1c1d20
+string.active           #16171a
+string.shadow           #0d0e10
+string.shine            #4a4d52
+string.radius           2
+accent                  #2e7d1c
+accent.text             #ffffff
+accent.mark             #5cc23f
+fill                    #3d8f28 0, #2a6f19 100
+fill.text               #ffffff
+selection.inactive      #2f4a2a
+list                    #202225
+list.alternate          #26282c
+list.header             #3a3d41 0, #2a2c30 100
+group.line              #0f1012
+group.highlight         #45484d
+group.radius            3
+tab                     #393b3f 0, #2c2e32 100
+tab.text                #c2c6cb
+tab.radius              3
+track                   #1a1b1e
+menu                    #2f3135
+menu.text               #e6e8eb
+menu.line               #4a4d52
+icon.text               #e6e8eb
+icon.shadow             0 1 #000000 100
+shadow.active           0 10 26 #000000 60
+shadow.inactive         0 6 16 #000000 45
+
+[four]
+; Pens 0 to 3: background, text and shadow, shine, fill.
+pens                    #a6a9ad #17181b #f2f3f4 #2e7d1c
+title.active.fill       1
+title.active.text       2
+fill.text               2

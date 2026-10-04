@@ -1,0 +1,20 @@
+; OpenGadTools theme. MIT, Copyright (c) 2026 Dalsin Limited.
+; The format is THEME_SPEC.md (version 1). Checked by tools/check_themes.py.
+;
+; Classic: the look switched off. Every patch passes straight through, so
+; the screen is pixel for pixel what OS 3.2 draws ("off is off"). The pens
+; below are OS 3.2's default four, for the prefs page's preview only.
+
+name            Classic
+description     "OS 3.2 as it draws today: the look switched off"
+version         1
+font            system
+title.align     left
+passthrough     yes
+
+[four]
+; Pens 0 to 3: background, text and shadow, shine, fill.
+pens                    #aaaaaa #000000 #ffffff #6688bb
+title.active.fill       3
+title.active.text       1
+fill.text               1
