@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""KyneMail engine tests on the host: builds test_engine (the engine with
+"""OpenAmigaMail engine tests on the host: builds test_engine (the engine with
 platform/posix and OpenSSL), makes a throwaway CA and a certificate for
 localhost, then runs the unit tests and each fake_imapd scenario.
 
@@ -15,7 +15,7 @@ SCENARIOS = ["plain", "login", "xoauth2", "xoauth2bad", "tls", "starttls"]
 def build(out):
     engine = os.path.join(KM, "engine")
     srcs = [os.path.join(engine, f) for f in sorted(os.listdir(engine)) if f.endswith(".c")]
-    srcs += [os.path.join(KM, "platform", "posix", "km_net_posix.c"), os.path.join(HERE, "test_engine.c")]
+    srcs += [os.path.join(KM, "platform", "posix", "oam_net_posix.c"), os.path.join(HERE, "test_engine.c")]
     cmd = ["gcc", "-std=gnu99", "-Wall", "-Wextra", "-Werror", "-g", "-O1", "-fsanitize=address,undefined",
            "-I" + engine, *srcs, "-lssl", "-lcrypto", "-o", out]
     subprocess.run(cmd, check=True)
@@ -24,7 +24,7 @@ def build(out):
 def certificates(d):
     ca_key, ca, key, csr, cert = (os.path.join(d, n) for n in ("ca.key", "ca.pem", "server.key", "server.csr", "server.pem"))
     run = lambda *a: subprocess.run(a, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    run("openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1", "-subj", "/CN=KyneMail test CA",
+    run("openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1", "-subj", "/CN=OpenAmigaMail test CA",
         "-keyout", ca_key, "-out", ca)
     run("openssl", "req", "-newkey", "rsa:2048", "-nodes", "-subj", "/CN=localhost", "-keyout", key, "-out", csr)
     ext = os.path.join(d, "ext.cnf")
@@ -40,7 +40,7 @@ def main():
         exe = os.path.join(d, "test_engine")
         build(exe)
         ca, cert, key = certificates(d)
-        env = dict(os.environ, KM_CA_FILE=ca)
+        env = dict(os.environ, OAM_CA_FILE=ca)
         failed = subprocess.run([exe, "unit"]).returncode != 0
         for sc in SCENARIOS:
             portfile = os.path.join(d, f"port-{sc}")

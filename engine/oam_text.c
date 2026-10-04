@@ -1,8 +1,8 @@
-/* km_text: see km_text.h. From RFC 5322 (headers, dates, addresses),
+/* oam_text: see oam_text.h. From RFC 5322 (headers, dates, addresses),
  * RFC 2047 (encoded words) and RFC 2231 (charset languages). */
-#include "km_text.h"
-#include "km_base64.h"
-#include "km_charsets.h"
+#include "oam_text.h"
+#include "oam_base64.h"
+#include "oam_charsets.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -10,12 +10,12 @@
 
 /* ---- UTF-8 ------------------------------------------------------------------ */
 
-static void put_utf8(km_buf *b, unsigned long c)
+static void put_utf8(oam_buf *b, unsigned long c)
 {
-    if (c < 0x80) km_buf_addc(b, (char)c);
-    else if (c < 0x800) { km_buf_addc(b, (char)(0xc0 | c >> 6)); km_buf_addc(b, (char)(0x80 | (c & 63))); }
-    else if (c < 0x10000) { km_buf_addc(b, (char)(0xe0 | c >> 12)); km_buf_addc(b, (char)(0x80 | (c >> 6 & 63))); km_buf_addc(b, (char)(0x80 | (c & 63))); }
-    else { km_buf_addc(b, (char)(0xf0 | c >> 18)); km_buf_addc(b, (char)(0x80 | (c >> 12 & 63))); km_buf_addc(b, (char)(0x80 | (c >> 6 & 63))); km_buf_addc(b, (char)(0x80 | (c & 63))); }
+    if (c < 0x80) oam_buf_addc(b, (char)c);
+    else if (c < 0x800) { oam_buf_addc(b, (char)(0xc0 | c >> 6)); oam_buf_addc(b, (char)(0x80 | (c & 63))); }
+    else if (c < 0x10000) { oam_buf_addc(b, (char)(0xe0 | c >> 12)); oam_buf_addc(b, (char)(0x80 | (c >> 6 & 63))); oam_buf_addc(b, (char)(0x80 | (c & 63))); }
+    else { oam_buf_addc(b, (char)(0xf0 | c >> 18)); oam_buf_addc(b, (char)(0x80 | (c >> 12 & 63))); oam_buf_addc(b, (char)(0x80 | (c >> 6 & 63))); oam_buf_addc(b, (char)(0x80 | (c & 63))); }
 }
 
 /* one character from UTF-8: its length in *n, or 0xFFFD and 1 for a bad byte */
@@ -38,7 +38,7 @@ static unsigned long get_utf8(const unsigned char *p, size_t left, size_t *n)
     return c;
 }
 
-int km_utf8_valid(const char *s, size_t len)
+int oam_utf8_valid(const char *s, size_t len)
 {
     const unsigned char *p = (const unsigned char *)s;
     size_t i = 0;
@@ -61,7 +61,7 @@ static const unsigned short *table_for(const char *cs)
     return NULL;
 }
 
-int km_charset_to_utf8(km_buf *out, const char *charset, const char *s, size_t len)
+int oam_charset_to_utf8(oam_buf *out, const char *charset, const char *s, size_t len)
 {
     char cs[40];
     size_t i, n = 0;
@@ -76,7 +76,7 @@ int km_charset_to_utf8(km_buf *out, const char *charset, const char *s, size_t l
     is_latin1 = !strcmp(cs, "iso-8859-1") || !strcmp(cs, "iso8859-1") || !strcmp(cs, "latin1") || !strcmp(cs, "l1");
     /* UTF-8 as UTF-8; US-ASCII and unknown charsets as UTF-8 when they are
      * valid UTF-8, else as ISO-8859-1 (8-bit bytes in headers mostly are) */
-    if (!strcmp(cs, "utf-8") || !strcmp(cs, "utf8") || (!is_latin1 && !table && km_utf8_valid(s, len))) {
+    if (!strcmp(cs, "utf-8") || !strcmp(cs, "utf8") || (!is_latin1 && !table && oam_utf8_valid(s, len))) {
         for (i = 0; i < len;) {                 /* checked one character at a time: bad bytes become U+FFFD */
             size_t k;
             unsigned long c = get_utf8(p + i, len - i, &k);
@@ -89,61 +89,61 @@ int km_charset_to_utf8(km_buf *out, const char *charset, const char *s, size_t l
     return !out->failed;
 }
 
-char *km_utf8_to_latin1(const char *utf8)
+char *oam_utf8_to_latin1(const char *utf8)
 {
-    km_buf out;
+    oam_buf out;
     const unsigned char *p = (const unsigned char *)utf8;
     size_t left = strlen(utf8);
-    km_buf_init(&out);
+    oam_buf_init(&out);
     while (left) {
         size_t n;
         unsigned long c = get_utf8(p, left, &n);
         p += n;
         left -= n;
-        if (c < 0x80 || (c >= 0xa0 && c < 0x100)) { km_buf_addc(&out, (char)c); continue; }
+        if (c < 0x80 || (c >= 0xa0 && c < 0x100)) { oam_buf_addc(&out, (char)c); continue; }
         if (c >= 0x100 && c < 0x180) {
-            if (c == 0x152) km_buf_adds(&out, "OE");
-            else if (c == 0x153) km_buf_adds(&out, "oe");
-            else if (c == 0x132) km_buf_adds(&out, "IJ");
-            else if (c == 0x133) km_buf_adds(&out, "ij");
-            else km_buf_addc(&out, latin_ext_a_base[c - 0x100]);
+            if (c == 0x152) oam_buf_adds(&out, "OE");
+            else if (c == 0x153) oam_buf_adds(&out, "oe");
+            else if (c == 0x132) oam_buf_adds(&out, "IJ");
+            else if (c == 0x133) oam_buf_adds(&out, "ij");
+            else oam_buf_addc(&out, latin_ext_a_base[c - 0x100]);
             continue;
         }
         switch (c) {
-        case 0x2018: case 0x2019: case 0x201a: case 0x2032: case 0x02bc: km_buf_addc(&out, '\''); break;
-        case 0x201c: case 0x201d: case 0x201e: case 0x2033: km_buf_addc(&out, '"'); break;
-        case 0x2013: case 0x2014: case 0x2212: case 0x2010: case 0x2011: km_buf_addc(&out, '-'); break;
-        case 0x2026: km_buf_adds(&out, "..."); break;
-        case 0x20ac: km_buf_adds(&out, "EUR"); break;
-        case 0x2022: km_buf_addc(&out, (char)0xb7); break;
-        case 0x2122: km_buf_adds(&out, "(TM)"); break;
-        case 0x2039: km_buf_addc(&out, '<'); break;
-        case 0x203a: km_buf_addc(&out, '>'); break;
-        case 0x0178: km_buf_addc(&out, 'Y'); break;
-        case 0x2009: case 0x200a: case 0x2002: case 0x2003: case 0x202f: km_buf_addc(&out, ' '); break;
+        case 0x2018: case 0x2019: case 0x201a: case 0x2032: case 0x02bc: oam_buf_addc(&out, '\''); break;
+        case 0x201c: case 0x201d: case 0x201e: case 0x2033: oam_buf_addc(&out, '"'); break;
+        case 0x2013: case 0x2014: case 0x2212: case 0x2010: case 0x2011: oam_buf_addc(&out, '-'); break;
+        case 0x2026: oam_buf_adds(&out, "..."); break;
+        case 0x20ac: oam_buf_adds(&out, "EUR"); break;
+        case 0x2022: oam_buf_addc(&out, (char)0xb7); break;
+        case 0x2122: oam_buf_adds(&out, "(TM)"); break;
+        case 0x2039: oam_buf_addc(&out, '<'); break;
+        case 0x203a: oam_buf_addc(&out, '>'); break;
+        case 0x0178: oam_buf_addc(&out, 'Y'); break;
+        case 0x2009: case 0x200a: case 0x2002: case 0x2003: case 0x202f: oam_buf_addc(&out, ' '); break;
         case 0x200b: case 0x200c: case 0x200d: case 0xfeff: case 0x00ad: break;      /* invisible: dropped */
-        default: km_buf_addc(&out, '?'); break;
+        default: oam_buf_addc(&out, '?'); break;
         }
     }
-    return km_buf_take(&out);
+    return oam_buf_take(&out);
 }
 
 /* ---- header fields -------------------------------------------------------------- */
 
-char *km_hdr_get(const char *header, size_t len, const char *name)
+char *oam_hdr_get(const char *header, size_t len, const char *name)
 {
     size_t nlen = strlen(name), i = 0;
     while (i < len) {
         size_t eol = i;
         while (eol < len && header[eol] != '\n') eol++;
         if (eol - i > nlen && !strncasecmp(header + i, name, nlen) && header[i + nlen] == ':') {
-            km_buf v;
+            oam_buf v;
             size_t j = i + nlen + 1;
-            km_buf_init(&v);
+            oam_buf_init(&v);
             for (;;) {
                 size_t end = eol;
                 if (end > j && header[end - 1] == '\r') end--;
-                km_buf_add(&v, header + j, end - j);
+                oam_buf_add(&v, header + j, end - j);
                 if (eol + 1 < len && (header[eol + 1] == ' ' || header[eol + 1] == '\t')) {   /* folded */
                     j = eol + 1;
                     eol = j;
@@ -153,7 +153,7 @@ char *km_hdr_get(const char *header, size_t len, const char *name)
                 break;
             }
             {   /* trimmed */
-                char *s = km_buf_take(&v), *a = s, *z;
+                char *s = oam_buf_take(&v), *a = s, *z;
                 if (!s) return NULL;
                 while (*a == ' ' || *a == '\t') a++;
                 z = a + strlen(a);
@@ -169,11 +169,11 @@ char *km_hdr_get(const char *header, size_t len, const char *name)
 }
 
 /* "=?charset?B|Q?text?=" at p: the decoded word appended as UTF-8, and its length in *used */
-static int encoded_word(km_buf *out, const char *p, size_t *used)
+static int encoded_word(oam_buf *out, const char *p, size_t *used)
 {
     const char *cs = p + 2, *q1, *q2, *end;
     char charset[40], enc;
-    km_buf raw;
+    oam_buf raw;
     size_t n;
     q1 = strchr(cs, '?');
     if (!q1 || (size_t)(q1 - cs) >= sizeof charset || q1 == cs) return 0;
@@ -185,66 +185,66 @@ static int encoded_word(km_buf *out, const char *p, size_t *used)
     for (n = 0; q2 + n < end; n++) if (q2[n] == ' ' || q2[n] == '\t') return 0;   /* no spaces inside a word */
     memcpy(charset, cs, (size_t)(q1 - cs));
     charset[q1 - cs] = 0;
-    km_buf_init(&raw);
+    oam_buf_init(&raw);
     if (enc == 'B') {
-        if (!km_base64_decode(&raw, q2, (size_t)(end - q2))) { km_buf_free(&raw); return 0; }
+        if (!oam_base64_decode(&raw, q2, (size_t)(end - q2))) { oam_buf_free(&raw); return 0; }
     } else {
         const char *t;
         for (t = q2; t < end; t++) {
-            if (*t == '_') km_buf_addc(&raw, ' ');
+            if (*t == '_') oam_buf_addc(&raw, ' ');
             else if (*t == '=' && t + 2 < end && isxdigit((unsigned char)t[1]) && isxdigit((unsigned char)t[2])) {
                 char hex[3] = { t[1], t[2], 0 };
-                km_buf_addc(&raw, (char)strtol(hex, NULL, 16));
+                oam_buf_addc(&raw, (char)strtol(hex, NULL, 16));
                 t += 2;
-            } else km_buf_addc(&raw, *t);
+            } else oam_buf_addc(&raw, *t);
         }
     }
-    km_charset_to_utf8(out, charset, raw.data ? raw.data : "", raw.len);
-    km_buf_free(&raw);
+    oam_charset_to_utf8(out, charset, raw.data ? raw.data : "", raw.len);
+    oam_buf_free(&raw);
     *used = (size_t)(end + 2 - p);
     return 1;
 }
 
-char *km_hdr_decode(const char *value)
+char *oam_hdr_decode(const char *value)
 {
-    km_buf out, plain, space;
+    oam_buf out, plain, space;
     const char *p = value;
     int after_word = 0;
-    km_buf_init(&out);
-    km_buf_init(&plain);
-    km_buf_init(&space);
+    oam_buf_init(&out);
+    oam_buf_init(&plain);
+    oam_buf_init(&space);
     while (*p) {
         size_t used;
         if (p[0] == '=' && p[1] == '?') {
-            km_buf word;
-            km_buf_init(&word);
+            oam_buf word;
+            oam_buf_init(&word);
             if (encoded_word(&word, p, &used)) {
-                if (plain.len) km_charset_to_utf8(&out, NULL, plain.data, plain.len);
-                km_buf_clear(&plain);
-                if (!after_word && space.len) km_buf_add(&out, space.data, space.len);   /* space between two words goes */
-                km_buf_clear(&space);
-                km_buf_add(&out, word.data ? word.data : "", word.len);
-                km_buf_free(&word);
+                if (plain.len) oam_charset_to_utf8(&out, NULL, plain.data, plain.len);
+                oam_buf_clear(&plain);
+                if (!after_word && space.len) oam_buf_add(&out, space.data, space.len);   /* space between two words goes */
+                oam_buf_clear(&space);
+                oam_buf_add(&out, word.data ? word.data : "", word.len);
+                oam_buf_free(&word);
                 after_word = 1;
                 p += used;
                 continue;
             }
-            km_buf_free(&word);
+            oam_buf_free(&word);
         }
         if (*p == ' ' || *p == '\t') {
-            if (plain.len) { km_charset_to_utf8(&out, NULL, plain.data, plain.len); km_buf_clear(&plain); after_word = 0; }
-            km_buf_addc(&space, *p++);
+            if (plain.len) { oam_charset_to_utf8(&out, NULL, plain.data, plain.len); oam_buf_clear(&plain); after_word = 0; }
+            oam_buf_addc(&space, *p++);
             continue;
         }
-        if (space.len) { km_buf_add(&out, space.data, space.len); km_buf_clear(&space); }
+        if (space.len) { oam_buf_add(&out, space.data, space.len); oam_buf_clear(&space); }
         after_word = 0;
-        km_buf_addc(&plain, *p++);
+        oam_buf_addc(&plain, *p++);
     }
-    if (plain.len) km_charset_to_utf8(&out, NULL, plain.data, plain.len);
-    if (space.len) km_buf_add(&out, space.data, space.len);
-    km_buf_free(&plain);
-    km_buf_free(&space);
-    return km_buf_take(&out);
+    if (plain.len) oam_charset_to_utf8(&out, NULL, plain.data, plain.len);
+    if (space.len) oam_buf_add(&out, space.data, space.len);
+    oam_buf_free(&plain);
+    oam_buf_free(&space);
+    return oam_buf_take(&out);
 }
 
 /* ---- addresses -------------------------------------------------------------------- */
@@ -262,17 +262,17 @@ static char *trimmed(const char *a, const char *z)
 /* a display name: quotes and escapes gone, encoded words decoded */
 static char *display_name(const char *a, const char *z)
 {
-    km_buf b;
+    oam_buf b;
     char *raw, *decoded;
-    km_buf_init(&b);
+    oam_buf_init(&b);
     for (; a < z; a++) {
         if (*a == '"') continue;
         if (*a == '\\' && a + 1 < z) a++;
-        km_buf_addc(&b, *a);
+        oam_buf_addc(&b, *a);
     }
-    raw = km_buf_take(&b);
+    raw = oam_buf_take(&b);
     if (!raw) return NULL;
-    decoded = km_hdr_decode(raw);
+    decoded = oam_hdr_decode(raw);
     free(raw);
     if (decoded) {
         char *t = trimmed(decoded, decoded + strlen(decoded));
@@ -282,7 +282,7 @@ static char *display_name(const char *a, const char *z)
     return NULL;
 }
 
-int km_hdr_address(const char *value, char **name, char **address)
+int oam_hdr_address(const char *value, char **name, char **address)
 {
     const char *p = value, *end, *lt = NULL, *gt = NULL, *cl = NULL, *cr = NULL;
     int quoted = 0, depth = 0;
@@ -325,7 +325,7 @@ static long long days_from_civil(long long y, unsigned m, unsigned d)
     return era * 146097 + (long long)doe - 719468;
 }
 
-int km_hdr_date(const char *value, long long *when, int *zone)
+int oam_hdr_date(const char *value, long long *when, int *zone)
 {
     static const char months[] = "janfebmaraprmayjunjulaugsepoctnovdec";
     const char *p = value;

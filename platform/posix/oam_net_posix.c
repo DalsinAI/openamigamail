@@ -1,8 +1,8 @@
-/* km_net for the host (Linux, macOS): POSIX sockets and OpenSSL. It is
+/* oam_net for the host (Linux, macOS): POSIX sockets and OpenSSL. It is
  * how the engine's tests run on the PC; the Amiga's is platform/amiga.
  * Certificates are checked against the system's store, or the file in
- * KM_CA_FILE (the tests' own CA). */
-#include "km_net.h"
+ * OAM_CA_FILE (the tests' own CA). */
+#include "oam_net.h"
 
 #include <errno.h>
 #include <netdb.h>
@@ -17,20 +17,20 @@
 #include <openssl/ssl.h>
 #include <openssl/x509v3.h>
 
-struct km_conn {
+struct oam_conn {
     int fd;
     SSL_CTX *ctx;
     SSL *ssl;
     char error[256];
 };
 
-void (*km_net_progress)(const char *step);
+void (*oam_net_progress)(const char *step);
 
-int km_net_init(char *err, size_t errlen) { (void)err; (void)errlen; return 1; }
+int oam_net_init(char *err, size_t errlen) { (void)err; (void)errlen; return 1; }
 
-void km_net_cleanup(void) {}
+void oam_net_cleanup(void) {}
 
-void km_net_set_timeout(km_conn *c, int seconds)
+void oam_net_set_timeout(oam_conn *c, int seconds)
 {
     struct timeval tv;
     tv.tv_sec = seconds;
@@ -43,9 +43,9 @@ static void set_err(char *err, size_t errlen, const char *what)
     if (err && errlen) snprintf(err, errlen, "%s", what);
 }
 
-static int start_tls(km_conn *c, const char *host, char *err, size_t errlen)
+static int start_tls(oam_conn *c, const char *host, char *err, size_t errlen)
 {
-    const char *ca = getenv("KM_CA_FILE");
+    const char *ca = getenv("OAM_CA_FILE");
     long verify;
     c->ctx = SSL_CTX_new(TLS_client_method());
     if (!c->ctx) { set_err(err, errlen, "TLS could not be set up."); return 0; }
@@ -72,11 +72,11 @@ static int start_tls(km_conn *c, const char *host, char *err, size_t errlen)
     return 1;
 }
 
-km_conn *km_net_connect(const char *host, int port, int tls, char *err, size_t errlen)
+oam_conn *oam_net_connect(const char *host, int port, int tls, char *err, size_t errlen)
 {
     struct addrinfo hints, *res = NULL, *ai;
     char portstr[16];
-    km_conn *c = calloc(1, sizeof *c);
+    oam_conn *c = calloc(1, sizeof *c);
     int rc;
     if (!c) { set_err(err, errlen, "Out of memory."); return NULL; }
     c->fd = -1;
@@ -107,17 +107,17 @@ km_conn *km_net_connect(const char *host, int port, int tls, char *err, size_t e
         free(c);
         return NULL;
     }
-    if (tls && !start_tls(c, host, err, errlen)) { km_net_close(c); return NULL; }
+    if (tls && !start_tls(c, host, err, errlen)) { oam_net_close(c); return NULL; }
     return c;
 }
 
-int km_net_starttls(km_conn *c, const char *host, char *err, size_t errlen)
+int oam_net_starttls(oam_conn *c, const char *host, char *err, size_t errlen)
 {
     if (c->ssl) return 1;
     return start_tls(c, host, err, errlen);
 }
 
-long km_net_read(km_conn *c, void *buf, long len)
+long oam_net_read(oam_conn *c, void *buf, long len)
 {
     long n;
     if (c->ssl) {
@@ -135,7 +135,7 @@ long km_net_read(km_conn *c, void *buf, long len)
     return n;
 }
 
-long km_net_write(km_conn *c, const void *buf, long len)
+long oam_net_write(oam_conn *c, const void *buf, long len)
 {
     const char *p = buf;
     long left = len;
@@ -150,9 +150,9 @@ long km_net_write(km_conn *c, const void *buf, long len)
     return len;
 }
 
-const char *km_net_error(km_conn *c) { return c->error[0] ? c->error : "No error."; }
+const char *oam_net_error(oam_conn *c) { return c->error[0] ? c->error : "No error."; }
 
-void km_net_close(km_conn *c)
+void oam_net_close(oam_conn *c)
 {
     if (!c) return;
     if (c->ssl) { SSL_shutdown(c->ssl); SSL_free(c->ssl); }

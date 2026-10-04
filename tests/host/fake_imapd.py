@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""A scripted IMAP server for KyneMail's engine tests. It accepts one client,
+"""A scripted IMAP server for OpenAmigaMail's engine tests. It accepts one client,
 answers like a real IMAP4rev1 server for the commands the engine sends,
 checks each of them, and exits 0 if the session went as the scenario says
 (1 otherwise, with the reason on stderr).
