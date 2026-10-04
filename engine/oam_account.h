@@ -1,13 +1,13 @@
 /* oam_account: one mail account, as the settings file keeps it
  * (ENVARC:OpenMail/Account on the Amiga), one "key = value" per line:
  *
- *     name     = Dale Kirkwood
- *     address  = dale@example.com
+ *     name     = Kim Example
+ *     address  = kim@example.com
  *     provider = Gmail
  *     imap     = imap.gmail.com 993 tls
  *     smtp     = smtp.gmail.com 465 tls
  *     auth     = password
- *     user     = dale@example.com
+ *     user     = kim@example.com
  *     secret   = <obscured>
  *
  * secret is the password (auth password) or the token file's path
