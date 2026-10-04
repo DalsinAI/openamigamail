@@ -1,6 +1,6 @@
 Short:        Mail for AmigaOS 3: IMAP, TLS, OAuth
-Uploader:     (Dale fills this in at upload time)
-Author:       Dale Kirkwood (Dalsin Limited)
+Uploader:     (We fill this in at upload time)
+Author:       Dalsin Limited
 Type:         comm/mail
 Version:      0.2
 Requires:     AmigaOS 3.0+, a TCP/IP stack, AmiSSL 5
