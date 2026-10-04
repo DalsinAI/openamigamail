@@ -57,3 +57,14 @@ It builds `build/os3/OpenMailCheck` with the os32 stove (bebbo's m68k-amigaos-gc
 `OpenMailCheck HOST 993 tls - FILE` only connects and shows what the server offers, with each step (opening the stack and AmiSSL, resolving, connecting, the handshake) on its own line: a check of the network without signing in.
 
 **Stacks:** a Shell gives a command 4 KB of stack, and the engine needs more: a TLS handshake alone runs deep. OpenMail's programs swap to a 64 KB stack at start (`oam_run_with_stack`). An `oam_imap` is about 4.3 KB, so keep it on the heap.
+
+## Icons
+
+OpenMail's icons are in OS 3.2 style: OS 3.5 colour icons with a classic
+fallback picture.
+- **`package/icons/OpenMail.info`**, the envelope. `tools/envelope_art.py`
+  draws it in full colour, and `tools/make_icons.js` turns it into an icon
+  with ACBuild's `amiga-icon.js`.
+- **`package/icons/Drawer.info`**, the drawer. It comes from the Boxie icon
+  set by Damir Šijaković (MIT, `package/icons/LICENCE.Boxie`), converted to
+  OS 3.2 GlowIcons by ACBuild.
