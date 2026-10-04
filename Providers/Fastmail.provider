@@ -1,0 +1,6 @@
+name    = Fastmail
+domains = fastmail.com fastmail.fm
+imap    = imap.fastmail.com 993 tls
+smtp    = smtp.fastmail.com 465 tls
+auth    = password
+note    = Fastmail wants an app password, made in its settings.
