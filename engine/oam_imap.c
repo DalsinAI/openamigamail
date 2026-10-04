@@ -1,4 +1,4 @@
-/* oam_imap: see oam_imap.h. Written for OpenAmigaMail from RFC 3501 (IMAP4rev1),
+/* oam_imap: see oam_imap.h. Written for OpenMail from RFC 3501 (IMAP4rev1),
  * RFC 4959 (SASL-IR), RFC 4616 (PLAIN) and Google's XOAUTH2 notes. */
 #include "oam_imap.h"
 #include "oam_base64.h"

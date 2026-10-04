@@ -1,0 +1,50 @@
+Short:        Mail for AmigaOS 3: IMAP, TLS, OAuth
+Uploader:     (Dale fills this in at upload time)
+Author:       Dale Kirkwood (Dalsin Limited)
+Type:         comm/mail
+Version:      0.2
+Requires:     AmigaOS 3.0+, a TCP/IP stack, AmiSSL 5
+Architecture: m68k-amigaos >= 3.0
+Distribution: Aminet
+
+OpenMail is a free mail client for AmigaOS 3.x, written from the
+standards (RFC 3501, 5321, 5322, MIME) with a GadTools interface.
+
+What it does today
+------------------
+- Reads mail over IMAP, with TLS or STARTTLS and the certificate checked
+  (AmiSSL 5).
+- Signs in with a password or an OAuth token (XOAUTH2).
+- Shows folders, the newest messages (unread and flagged marked), and
+  each message as text: multipart mail, quoted-printable and base64,
+  common character sets, HTML turned into readable text with its links
+  numbered. Nothing is fetched to show a message, so there are no
+  tracking pixels.
+- "View in browser" opens a message's HTML in your web browser, and
+  "Links..." opens any of its links: through ENV:OpenMail/Browser (a
+  command with %s), AmigaChrome's browser, or OpenURL.
+- Talks to the servers from a process of its own, so the window never
+  freezes while mail comes in.
+
+Writing, replying and an account window come in the next version.
+
+Providers and sign-in methods are plugins
+-----------------------------------------
+A mail service is a small text file in Providers/ (Gmail, Outlook.com,
+Yahoo, iCloud and Fastmail are included); anyone can add one. Sign-in
+methods are Amiga libraries behind one interface, so new ones can be
+added without changing OpenMail.
+
+Installing
+----------
+Copy the OpenMail drawer anywhere. Until the account window arrives,
+the account is a text file, ENV:OpenMail/Account (see README.md).
+
+Licence
+-------
+MIT. Copyright (c) 2026 Dalsin Limited. Use it, change it, fork it and
+pass it on, free; the copyright and licence notice stays with every
+copy. If you fork it, please say it is based on OpenMail by Dalsin
+Limited (a request, not a condition).
+
+Source: https://github.com/DalsinAI/openamigamail

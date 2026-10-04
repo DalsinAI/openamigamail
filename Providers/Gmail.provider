@@ -1,0 +1,11 @@
+# Gmail and Google Workspace mail
+name    = Gmail
+domains = gmail.com googlemail.com
+imap    = imap.gmail.com 993 tls
+smtp    = smtp.gmail.com 465 tls
+auth    = xoauth2-browser password
+oauth.authorize = https://accounts.google.com/o/oauth2/v2/auth
+oauth.token     = https://oauth2.googleapis.com/token
+oauth.scope     = https://mail.google.com/
+oauth.client    = REGISTER-ME
+note    = Google wants OAuth sign-in. An app password also works for accounts with 2-step verification.

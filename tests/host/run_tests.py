@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""OpenAmigaMail engine tests on the host: builds test_engine (the engine with
+"""OpenMail engine tests on the host: builds test_engine (the engine with
 platform/posix and OpenSSL), makes a throwaway CA and a certificate for
 localhost, then runs the unit tests and each fake_imapd scenario.
 
@@ -24,7 +24,7 @@ def build(out):
 def certificates(d):
     ca_key, ca, key, csr, cert = (os.path.join(d, n) for n in ("ca.key", "ca.pem", "server.key", "server.csr", "server.pem"))
     run = lambda *a: subprocess.run(a, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    run("openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1", "-subj", "/CN=OpenAmigaMail test CA",
+    run("openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1", "-subj", "/CN=OpenMail test CA",
         "-keyout", ca_key, "-out", ca)
     run("openssl", "req", "-newkey", "rsa:2048", "-nodes", "-subj", "/CN=localhost", "-keyout", key, "-out", csr)
     ext = os.path.join(d, "ext.cnf")
@@ -42,6 +42,7 @@ def main():
         ca, cert, key = certificates(d)
         env = dict(os.environ, OAM_CA_FILE=ca)
         failed = subprocess.run([exe, "unit"]).returncode != 0
+        failed = subprocess.run([exe, "providers", os.path.join(KM, "Providers")]).returncode != 0 or failed
         for sc in SCENARIOS:
             portfile = os.path.join(d, f"port-{sc}")
             srv = subprocess.Popen([sys.executable, os.path.join(HERE, "fake_imapd.py"), sc, portfile, cert, key])

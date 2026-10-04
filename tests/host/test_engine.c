@@ -1,4 +1,4 @@
-/* OpenAmigaMail engine tests on the host.
+/* OpenMail engine tests on the host.
  *   test_engine unit                 the engine's pieces on their own
  *   test_engine imap SCENARIO PORT   a session against fake_imapd.py
  * Exit 0 when every check passes; each failure is printed. */
@@ -6,6 +6,10 @@
 #include "oam_imap.h"
 #include "oam_sasl.h"
 #include "oam_text.h"
+#include "oam_provider.h"
+#include "oam_html.h"
+#include "oam_mime.h"
+#include "oam_account.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -95,6 +99,141 @@ static void check_decode(const char *in, const char *want)
     char *s = oam_hdr_decode(in);
     check_str(s, want, in);
     free(s);
+}
+
+static void unit_provider(void)
+{
+    static const char gmail[] =
+        "# Gmail, the way OpenMail ships it\n"
+        "name    = Gmail\n"
+        "domains = gmail.com googlemail.com\n"
+        "imap    = imap.gmail.com 993 tls\n"
+        "smtp    = smtp.gmail.com 587 starttls\n"
+        "auth    = xoauth2-browser password\n"
+        "  oauth.token = https://oauth2.googleapis.com/token  \n"
+        "note = Two-step accounts can use an app password.\n";
+    oam_provider p;
+    char err[96];
+    CHECK(oam_provider_parse(gmail, &p, err, sizeof err), "provider parses: %s", err);
+    check_str(p.name, "Gmail", "provider name");
+    check_str(p.imap.host, "imap.gmail.com", "imap host");
+    CHECK(p.imap.port == 993 && p.imap.security == OAM_IMAP_TLS, "imap port and tls");
+    CHECK(p.smtp.port == 587 && p.smtp.security == OAM_IMAP_STARTTLS, "smtp starttls");
+    CHECK(p.nauth == 2 && !strcmp(p.auth[0], "xoauth2-browser"), "auth methods in order");
+    CHECK(oam_provider_has_auth(&p, "password") && !oam_provider_has_auth(&p, "xoauth2-device"), "has_auth");
+    check_str(oam_provider_get(&p, "oauth.token"), "https://oauth2.googleapis.com/token", "an extra key, trimmed");
+    CHECK(!oam_provider_get(&p, "oauth.scope"), "a missing key is NULL");
+    CHECK(oam_provider_matches(&p, "dale@gmail.com"), "matches its domain");
+    CHECK(oam_provider_matches(&p, "dale@GoogleMail.COM"), "matches without regard to case");
+    CHECK(oam_provider_matches(&p, "dale@mail.gmail.com"), "matches a subdomain");
+    CHECK(!oam_provider_matches(&p, "dale@notgmail.com"), "not another domain that ends the same");
+    CHECK(!oam_provider_matches(&p, "gmail.com"), "not without an @");
+    CHECK(!oam_provider_parse("name = X\nimap = host 993 maybe\nauth = password\n", &p, err, sizeof err) &&
+          strstr(err, "line 2"), "a bad security word is refused, with its line: %s", err);
+    CHECK(!oam_provider_parse("name = X\nauth = password\n", &p, err, sizeof err), "no imap server is refused");
+    CHECK(!oam_provider_parse("name = X\nimap = h 993 tls\njunk\n", &p, err, sizeof err), "a line without = is refused");
+}
+
+static void html_case(const char *html, const char *want_text, const char *want_links)
+{
+    oam_buf t, l;
+    oam_buf_init(&t);
+    oam_buf_init(&l);
+    CHECK(oam_html_to_text(html, strlen(html), &t, &l), "html converts");
+    check_str(oam_buf_str(&t), want_text, html);
+    check_str(oam_buf_str(&l), want_links, "links");
+    oam_buf_free(&t);
+    oam_buf_free(&l);
+}
+
+static void unit_html(void)
+{
+    html_case("<p>Hello <b>world</b></p><p>Second</p>", "Hello world\n\nSecond", "");
+    html_case("<html><head><title>T</title><style>p{x:1}</style></head><body>Hi<script>alert(1)</script> there</body></html>",
+              "Hi there", "");
+    html_case("Line one<br>Line   two<br/>\n  three", "Line one\nLine two\nthree", "");
+    html_case("<ul><li>apples</li><li>pears</li></ul>after", "- apples\n- pears\n\nafter", "");
+    html_case("See <a href=\"https://aminet.net/\">Aminet</a> and <a href='#top'>top</a>.",
+              "See Aminet [1] and top.", "https://aminet.net/\n");
+    html_case("Fish &amp; chips &lt;3 &#163;5 &#x20AC;2 &nbsp;&copy; &bogus;", "Fish & chips <3 \xc2\xa3" "5 \xe2\x82\xac" "2 \xc2\xa9 &bogus;", "");
+    html_case("<pre>a  b\n  c</pre>d", "a  b\n  c\n\nd", "");
+    html_case("<img src=\"cid:x\" alt=\"Logo\"> text<!-- hidden <b>x</b> -->", "[Logo] text", "");
+    html_case("<table><tr><td>A</td><td>B</td></tr><tr><td>C</td></tr></table>", "A B\nC", "");
+}
+
+static void view_case(const char *msg, const char *want_text, const char *want_links, int want_html, int want_att, const char *what)
+{
+    oam_view v;
+    oam_view_init(&v);
+    CHECK(oam_mime_view(msg, strlen(msg), &v), "%s: view", what);
+    check_str(oam_buf_str(&v.text), want_text, what);
+    check_str(oam_buf_str(&v.links), want_links, what);
+    CHECK(v.has_html == want_html, "%s: has_html %d", what, v.has_html);
+    CHECK(v.attachments == want_att, "%s: attachments %d", what, v.attachments);
+    oam_view_free(&v);
+}
+
+static void unit_mime(void)
+{
+    view_case("Subject: x\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n"
+              "Caf=C3=A9 so=\r\nft break, see https://aminet.net/.\r\nLine two\r\n",
+              "Caf\xc3\xa9 soft break, see https://aminet.net/.\nLine two\n", "https://aminet.net/\n", 0, 0, "plain QP");
+    view_case("Content-Type: multipart/alternative; boundary=\"b1\"\n\nignored preamble\n--b1\nContent-Type: text/plain\n\nplain one\n"
+              "--b1\nContent-Type: text/html\n\n<p>html <a href=\"https://x.org\">one</a></p>\n--b1--\nepilogue\n",
+              "plain one", "", 1, 0, "alternative prefers the text");
+    view_case("Content-Type: multipart/alternative; boundary=b2\n\n--b2\nContent-Type: text/html; charset=iso-8859-1\n"
+              "Content-Transfer-Encoding: base64\n\nPHA+Q2Fm6TwvcD48cD48YSBocmVmPSJodHRwOi8veS5vcmciPnk8L2E+PC9wPg==\n--b2--\n",
+              "Caf\xc3\xa9\n\ny [1]", "http://y.org\n", 1, 0, "html only, base64, latin-1");
+    view_case("Content-Type: multipart/mixed; boundary=outer\n\n--outer\nContent-Type: multipart/alternative; boundary=inner\n\n"
+              "--inner\nContent-Type: text/plain\n\nnested text\n--inner--\n--outer\nContent-Type: application/pdf; name=\"a.pdf\"\n"
+              "Content-Disposition: attachment; filename*=utf-8''r%C3%A9sum%C3%A9.pdf\nContent-Transfer-Encoding: base64\n\nJVBERg==\n--outer\n"
+              "Content-Type: image/png\nContent-ID: <Logo1@x>\n\nPNG\n--outer--\n",
+              "nested text", "", 0, 1, "mixed: nested text, one attachment, an inline image");
+    view_case("Just a body\nwith no header\n", "Just a body\nwith no header\n", "", 0, 0, "not a message");
+    {   /* the attachment's name, decoded */
+        struct { char name[128]; char cid[128]; } got = { "", "" };
+        const char *m = "Content-Type: multipart/mixed; boundary=z\n\n--z\nContent-Type: application/pdf\n"
+                        "Content-Disposition: attachment; filename*=utf-8''r%C3%A9sum%C3%A9.pdf\n\nx\n--z\n"
+                        "Content-Type: image/png\nContent-ID: <Logo1@X>\n\ny\n--z--\n";
+        void cb(const oam_part *p, void *u);
+        oam_mime_walk(m, strlen(m), cb, &got);
+        check_str(got.name, "r\xc3\xa9sum\xc3\xa9.pdf", "RFC 2231 filename");
+        check_str(got.cid, "Logo1@X", "Content-ID keeps its case");
+    }
+}
+
+void cb(const oam_part *p, void *u)
+{
+    struct { char name[128]; char cid[128]; } *got = u;
+    if (p->filename[0]) snprintf(got->name, sizeof got->name, "%s", p->filename);
+    if (p->cid[0]) snprintf(got->cid, sizeof got->cid, "%s", p->cid);
+}
+
+static void unit_account(void)
+{
+    oam_account a, b;
+    oam_provider p;
+    oam_buf f;
+    char err[96];
+    memset(&a, 0, sizeof a);
+    strcpy(a.name, "Dale Kirkwood");
+    strcpy(a.address, "dale@example.com");
+    CHECK(oam_provider_parse("name = Example\nimap = imap.example.com 993 tls\nsmtp = smtp.example.com 587 starttls\n"
+                             "auth = password xoauth2-device\n", &p, err, sizeof err), "provider: %s", err);
+    oam_account_from_provider(&a, &p);
+    check_str(a.auth, "password", "the provider's first method");
+    strcpy(a.secret, "p\xc3\xa4ss = \"w0rd\"\\ #1");
+    oam_buf_init(&f);
+    CHECK(oam_account_format(&a, &f), "format");
+    CHECK(!strstr(oam_buf_str(&f), "w0rd"), "the password is not in the file as it is");
+    CHECK(oam_account_parse(oam_buf_str(&f), &b, err, sizeof err), "parse: %s", err);
+    check_str(b.secret, a.secret, "the secret comes back");
+    check_str(b.name, "Dale Kirkwood", "name");
+    check_str(b.provider, "Example", "provider");
+    CHECK(b.imap.port == 993 && b.imap.security == OAM_IMAP_TLS && b.smtp.security == OAM_IMAP_STARTTLS, "servers");
+    oam_buf_free(&f);
+    CHECK(!oam_account_parse("address = x@y\nimap = h 993 tls\nsecret = plain-text\n", &b, err, sizeof err), "an unmarked secret is refused");
+    CHECK(!oam_account_parse("name = x\n", &b, err, sizeof err), "no address is refused");
 }
 
 static void unit_text(void)
@@ -242,6 +381,33 @@ done:
     return failures == start;
 }
 
+/* test_engine providers DIR: every .provider file in DIR parses. */
+#include <dirent.h>
+static void providers(const char *dir)
+{
+    DIR *d = opendir(dir);
+    struct dirent *e;
+    int seen = 0;
+    CHECK(d != NULL, "cannot open %s", dir);
+    while (d && (e = readdir(d))) {
+        char path[512], text[4096], err[96];
+        size_t n = strlen(e->d_name);
+        FILE *f;
+        oam_provider p;
+        if (n < 10 || strcmp(e->d_name + n - 9, ".provider")) continue;
+        snprintf(path, sizeof path, "%s/%s", dir, e->d_name);
+        f = fopen(path, "r");
+        n = f ? fread(text, 1, sizeof text - 1, f) : 0;
+        if (f) fclose(f);
+        text[n] = 0;
+        CHECK(oam_provider_parse(text, &p, err, sizeof err), "%s: %s", e->d_name, err);
+        CHECK(p.smtp.port != 0, "%s has no smtp server", e->d_name);
+        seen++;
+    }
+    if (d) closedir(d);
+    CHECK(seen >= 5, "only %d providers in %s", seen, dir);
+}
+
 int main(int argc, char **argv)
 {
     if (argc >= 2 && !strcmp(argv[1], "unit")) {
@@ -249,6 +415,12 @@ int main(int argc, char **argv)
         unit_sasl();
         unit_mutf7();
         unit_text();
+        unit_provider();
+        unit_html();
+        unit_mime();
+        unit_account();
+    } else if (argc >= 3 && !strcmp(argv[1], "providers")) {
+        providers(argv[2]);
     } else if (argc >= 4 && !strcmp(argv[1], "imap")) {
         imap_session(argv[2], atoi(argv[3]));
     } else {
