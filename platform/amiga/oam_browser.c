@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 
-struct RxsLib *RexxSysBase;
+struct RxsLib *RexxSysBase = NULL;
 
 static int is_url(const char *what)
 {

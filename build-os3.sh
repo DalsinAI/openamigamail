@@ -12,3 +12,7 @@ mkdir -p "$OUT"
 "$CC" -noixemul -m68020 -std=gnu99 -Wall -Werror -O2 -I"$HERE/engine" -I"$HERE/platform/amiga" -I"$AMISSL" \
     "$HERE"/engine/*.c "$HERE"/platform/amiga/*.c "$HERE/tools/openamigamailcheck.c" -o "$OUT/OpenAmigaMailCheck"
 echo "$OUT/OpenAmigaMailCheck ($(wc -c < "$OUT/OpenAmigaMailCheck") bytes)"
+# OpenAmigaMail itself: the GadTools window (app/) on the same engine.
+"$CC" -noixemul -m68020 -std=gnu99 -Wall -Werror -Wno-pointer-sign -O2 -fno-common -I"$HERE/engine" -I"$HERE/platform/amiga" -I"$HERE/app" -I"$AMISSL" \
+    "$HERE"/engine/*.c "$HERE"/platform/amiga/*.c "$HERE"/app/*.c -lamiga -o "$OUT/OpenAmigaMail"
+echo "$OUT/OpenAmigaMail ($(wc -c < "$OUT/OpenAmigaMail") bytes)"
