@@ -58,11 +58,11 @@ static void unit_sasl(void)
     CHECK(oam_sasl_xoauth2(&b, "someuser@example.com", "ya29.vF9dft4qmTc2Nvb3RlckBhdHRhdmljYS5vY29tCg"), "xoauth2");
     check_str(oam_buf_str(&b), "dXNlcj1zb21ldXNlckBleGFtcGxlLmNvbQFhdXRoPUJlYXJlciB5YTI5LnZGOWRmdDRxbVRjMk52YjNSbGNrQmhkSFJoZG1sallTNXZZMjl0Q2cBAQ==", "xoauth2");
     oam_buf_clear(&b);
-    CHECK(oam_sasl_plain(&b, "dale", "secret"), "plain");
-    check_str(oam_buf_str(&b), "AGRhbGUAc2VjcmV0", "plain");
+    CHECK(oam_sasl_plain(&b, "kim", "secret"), "plain");
+    check_str(oam_buf_str(&b), "AGtpbQBzZWNyZXQ=", "plain");
     oam_buf_clear(&b);
-    CHECK(!oam_sasl_plain(&b, "dale", "sec\nret"), "plain refuses a line break");
-    CHECK(!oam_sasl_xoauth2(&b, "dale", "tok en"), "xoauth2 refuses a space in the token");
+    CHECK(!oam_sasl_plain(&b, "kim", "sec\nret"), "plain refuses a line break");
+    CHECK(!oam_sasl_xoauth2(&b, "kim", "tok en"), "xoauth2 refuses a space in the token");
     oam_buf_free(&b);
 }
 
