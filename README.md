@@ -68,3 +68,7 @@ fallback picture.
 - **`package/icons/Drawer.info`**, the drawer. It comes from the Boxie icon
   set by Damir Šijaković (MIT, `package/icons/LICENCE.Boxie`), converted to
   OS 3.2 GlowIcons by ACBuild.
+
+## Contributors
+
+OpenMail is created and maintained by [SacredTrees](https://github.com/SacredTrees) with the AmigaChrome agent team, copyright Dalsin Limited. Everyone whose work it includes is credited in [`CONTRIBUTORS.md`](CONTRIBUTORS.md).
