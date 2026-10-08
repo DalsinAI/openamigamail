@@ -22,13 +22,13 @@ The engine meets the network only through `engine/oam_net.h`, so the same protoc
 
 | Step | State |
 | --- | --- |
-| 1. IMAP over TLS or STARTTLS: PLAIN, LOGIN and XOAUTH2 sign-in; folders; select; summaries; whole messages; flags | **Done, tested on the host** |
-| 2. Headers for people: fields, RFC 2047 encoded words, names and addresses, dates; seven charsets to UTF-8, and UTF-8 to the Amiga's Latin-1 | **Done, tested on the host** |
+| 1. IMAP over TLS or STARTTLS: PLAIN, LOGIN and XOAUTH2 sign-in; folders; select; summaries; whole messages; flags | **Done, tested on x86 cores** |
+| 2. Headers for people: fields, RFC 2047 encoded words, names and addresses, dates; seven charsets to UTF-8, and UTF-8 to the Amiga's Latin-1 | **Done, tested on x86 cores** |
 | 3. The Amiga's network: bsdsocket.library and AmiSSL 5 (`OpenAmiSSLTags`), read timeouts with WaitSelect | **Done**: on AmigaOS 3.2.3 over ACNet, now OpenSocket (2 Oct 2026), OpenMailCheck reaches imap.gmail.com and outlook.office365.com: DNS, TCP, a TLS handshake with the certificate checked, and the IMAP capabilities (both offer XOAUTH2) |
 | 4. The ReAction main window: folders, message list, plain-text reading | |
 | 5. SMTP and the compose window | |
 | 6. MIME: multipart, quoted-printable, base64, attachments | |
-| 7. OAuth tokens: from AmigaChrome's host; device-code sign-in for providers that allow it (Microsoft); refresh on the Amiga | |
+| 7. OAuth tokens: from AmigaChrome's Cradle; device-code sign-in for providers that allow it (Microsoft); refresh on the Amiga | |
 | 8. Local cache, search, filters, address book | |
 
 ## Testing on the host
