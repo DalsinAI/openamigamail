@@ -234,6 +234,13 @@ static void unit_account(void)
     oam_buf_free(&f);
     CHECK(!oam_account_parse("address = x@y\nimap = h 993 tls\nsecret = plain-text\n", &b, err, sizeof err), "an unmarked secret is refused");
     CHECK(!oam_account_parse("name = x\n", &b, err, sizeof err), "no address is refused");
+    {   /* a value too long for its field is refused, not cut: a cut address is someone else's */
+        char t[400];
+        snprintf(t, sizeof t, "address = %0130d@y\nimap = h 993 tls\n", 0);
+        CHECK(!oam_account_parse(t, &b, err, sizeof err) && strstr(err, "too long"), "a 132-byte address is refused (%s)", err);
+        snprintf(t, sizeof t, "address = x@y\nuser = %0127d\nimap = h 993 tls\n", 0);
+        CHECK(oam_account_parse(t, &b, err, sizeof err) && strlen(b.user) == 127, "a 127-byte user still fits");
+    }
 }
 
 static void unit_text(void)

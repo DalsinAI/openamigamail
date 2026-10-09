@@ -169,7 +169,7 @@ int oam_account_window(struct Screen *scr, APTR vi, struct TextAttr *ta, oam_acc
     struct NewGadget ng;
     struct Window *w = NULL;
     oam_provider prov;
-    char line1[100], line2[100], ptext[180];
+    char line1[120], line2[120], ptext[180];       /* line1: a provider name[48] and its sentence */
     int fh, cw, lw, x, y, ww, row, found = 0, can_save, result = 0, done = 0;
 
     if (!font) return 0;

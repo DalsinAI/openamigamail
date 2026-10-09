@@ -140,7 +140,7 @@ static ogt_list *folder_list, *msg_list, *body_list;
 static oam_account account;
 static BOOL have_account, connected;
 static void account_menu(void);
-static char status[200] = "Starting...";
+static char status[sizeof ((struct oam_job *)0)->error + 64] = "Starting...";   /* a job's whole error and its words */
 static char filter[64];
 
 static oam_imap_folder *folders;
@@ -156,7 +156,7 @@ static oam_view view;
 static BOOL have_view;
 
 /* what each list shows */
-typedef struct frow { int kind, folder, depth, icon; char name[80]; } frow;      /* kind 0 heading, 1 folder */
+typedef struct frow { int kind, folder, depth, icon; char name[128]; } frow;     /* kind 0 heading, 1 folder; name: an address */      /* kind 0 heading, 1 folder */
 typedef struct mrow { int kind, msg; char label[32]; } mrow;                     /* kind 0 heading, 1 message */
 static frow *frows;
 static int nfrows;
