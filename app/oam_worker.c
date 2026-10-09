@@ -7,6 +7,7 @@
 #include <proto/exec.h>
 #include <proto/dos.h>
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,9 +45,21 @@ void oam_job_free(struct oam_job *j)
 static oam_imap imap;
 static int connected;
 
+/* The job's error: a server's text can be any length, so a long one is cut
+ * to fit and ends in "..." to show it. */
+static void __attribute__((format(printf, 2, 3))) set_error(struct oam_job *j, const char *fmt, ...)
+{
+    va_list ap;
+    int n;
+    va_start(ap, fmt);
+    n = vsnprintf(j->error, sizeof j->error, fmt, ap);
+    va_end(ap);
+    if (n >= (int)sizeof j->error) strcpy(j->error + sizeof j->error - 4, "...");
+}
+
 static void fail(struct oam_job *j, const char *what)
 {
-    snprintf(j->error, sizeof j->error, "%s: %s", what, oam_imap_error(&imap));
+    set_error(j, "%s: %s", what, oam_imap_error(&imap));
 }
 
 static int read_token(const char *path, char *out, size_t size)
@@ -75,7 +88,7 @@ static void do_connect(struct oam_job *j)
     } else if (!strcmp(a->auth, "xoauth2-token")) {
         static char token[4096];
         if (!read_token(a->secret, token, sizeof token)) {
-            snprintf(j->error, sizeof j->error, "The token file %s could not be read", a->secret);
+            set_error(j, "The token file %s could not be read", a->secret);
             oam_imap_close(&imap);
             return;
         }

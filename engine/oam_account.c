@@ -18,9 +18,13 @@ static void obscure(const char *in, size_t n, char *out, int on)
     }
 }
 
-static void copy(char *out, size_t size, const char *s)
+/* 1 when s fits whole; a value too long for its field is refused, never cut
+ * (a cut address or login name would be someone else's) */
+static int copy(char *out, size_t size, const char *s)
 {
-    snprintf(out, size, "%s", s);
+    if (strlen(s) >= size) return 0;
+    strcpy(out, s);
+    return 1;
 }
 
 static int server_text(const char *v, oam_server *s)
@@ -31,7 +35,7 @@ static int server_text(const char *v, oam_server *s)
     s->security = !strcmp(sec, "tls") ? OAM_IMAP_TLS : !strcmp(sec, "starttls") ? OAM_IMAP_STARTTLS :
                   !strcmp(sec, "plain") ? OAM_IMAP_PLAIN : -1;
     if (s->security < 0) return 0;
-    copy(s->host, sizeof s->host, host);
+    if (!copy(s->host, sizeof s->host, host)) return 0;
     s->port = port;
     return 1;
 }
@@ -61,12 +65,16 @@ int oam_account_parse(const char *text, oam_account *a, char *err, size_t errlen
         while (ve > v && isspace((unsigned char)ve[-1])) ve--;
         snprintf(key, sizeof key, "%.*s", (int)(ke - k), k);
         snprintf(value, sizeof value, "%.*s", (int)(ve - v), v);
-        if (!strcmp(key, "name")) copy(a->name, sizeof a->name, value);
-        else if (!strcmp(key, "address")) copy(a->address, sizeof a->address, value);
-        else if (!strcmp(key, "provider")) copy(a->provider, sizeof a->provider, value);
-        else if (!strcmp(key, "auth")) copy(a->auth, sizeof a->auth, value);
-        else if (!strcmp(key, "user")) copy(a->user, sizeof a->user, value);
-        else if (!strcmp(key, "imap") || !strcmp(key, "smtp")) {
+        const struct { const char *key; char *field; size_t size; } texts[] = {
+            { "name", a->name, sizeof a->name }, { "address", a->address, sizeof a->address },
+            { "provider", a->provider, sizeof a->provider }, { "auth", a->auth, sizeof a->auth },
+            { "user", a->user, sizeof a->user },
+        };
+        size_t t;
+        for (t = 0; t < sizeof texts / sizeof texts[0] && strcmp(key, texts[t].key); t++) ;
+        if (t < sizeof texts / sizeof texts[0]) {
+            if (!copy(texts[t].field, texts[t].size, value)) { snprintf(err, errlen, "line %d: the %s is too long", line, key); return 0; }
+        } else if (!strcmp(key, "imap") || !strcmp(key, "smtp")) {
             if (!server_text(value, key[0] == 'i' ? &a->imap : &a->smtp)) {
                 snprintf(err, errlen, "line %d: %s wants \"host port tls|starttls|plain\"", line, key);
                 return 0;
