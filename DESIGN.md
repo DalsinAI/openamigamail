@@ -67,6 +67,14 @@ on it meets 4.5:1.
 +--------------------------------------------------------------------------------+
 ```
 
+### The first size
+
+The window first opens at 800 x 600, centred in the screen's free area (below
+the title bar and beside OpenDock), and never larger than that area, so on a
+screen smaller than 800 x 600 it is the whole free area (the rule for every
+Open app, 10 October 2026, as in OpenFiles 0.2.3). A size the user gives the
+window is kept: OpenWindows remembers it.
+
 ### The toolbar
 
 - **Icons,** following the common rules of OpenGadTools section 0. A
