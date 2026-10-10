@@ -52,7 +52,7 @@
 
 struct Library *GadToolsBase = NULL;      /* ours, not libnix's auto-open stub */
 
-#define VERSION_TEXT "OpenMail 0.3 (4.10.2026)"
+#define VERSION_TEXT "OpenMail 0.3.1 (10.10.2026)"
 static const char version[] __attribute__((used)) = "$VER: " VERSION_TEXT;
 #define ACCOUNT_FILE "ENV:OpenMail/Account"
 #define THEME_ENV "ENV:OpenGadTools/Theme"
@@ -89,8 +89,8 @@ static struct NewMenu menus[] = {
     { NM_SUB, "Graphite (dark)", NULL, CHECKIT, ~8 & 31, (APTR)M_TH_GRAPHITE_DARK },
     { NM_SUB, "Classic", NULL, CHECKIT, ~16 & 31, (APTR)M_TH_CLASSIC },
     { NM_ITEM, "Toolbar", NULL, 0, 0, NULL },
-    { NM_SUB, "Icons and text", NULL, CHECKIT | CHECKED, ~1 & 7, (APTR)M_TB_BOTH },
-    { NM_SUB, "Icons only", NULL, CHECKIT, ~2 & 7, (APTR)M_TB_ICONS },
+    { NM_SUB, "Icons and text", NULL, CHECKIT, ~1 & 7, (APTR)M_TB_BOTH },
+    { NM_SUB, "Icons only", NULL, CHECKIT | CHECKED, ~2 & 7, (APTR)M_TB_ICONS },
     { NM_SUB, "Text only", NULL, CHECKIT, ~4 & 7, (APTR)M_TB_TEXT },
     { NM_END, NULL, NULL, 0, 0, NULL }
 };
@@ -133,7 +133,8 @@ static BOOL quit_now;
 static ogt_theme theme;
 static ogt_ctx ctx;
 static char theme_name[48] = "Open";
-static int theme_mode = OGT_LIGHT, tb_style = OGT_TB_ICONS_TEXT;
+static int theme_mode = OGT_LIGHT;
+static int tb_style = OGT_TB_ICONS;     /* icons only to start (the Team's rule, 10 October 2026) */
 static ogt_toolbar tb, rb;
 static ogt_list *folder_list, *msg_list, *body_list;
 

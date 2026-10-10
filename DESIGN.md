@@ -69,9 +69,10 @@ on it meets 4.5:1.
 
 ### The toolbar
 
-- **Icons with their names under them,** following the common rules of
-  OpenGadTools section 0. A setting chooses icons and text (the default),
-  icons only, or text only, and help bubbles name every icon.
+- **Icons,** following the common rules of OpenGadTools section 0. A
+  setting chooses icons only (the default: every Open app starts with
+  icons, not icons and text, the Team's rule of 10 October 2026), icons
+  and text, or text only, and help bubbles name every icon.
 - **The groups:**
   - New mail;
   - Reply, Reply all, Forward;
