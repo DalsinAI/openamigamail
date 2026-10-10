@@ -2,7 +2,7 @@ Short:        Mail for AmigaOS 3: IMAP, TLS, OAuth
 Uploader:     (We fill this in at upload time)
 Author:       Dalsin Limited
 Type:         comm/mail
-Version:      0.2
+Version:      0.3.1
 Requires:     AmigaOS 3.0+, a TCP/IP stack, AmiSSL 5
 Architecture: m68k-amigaos >= 3.0
 Distribution: Aminet
@@ -48,3 +48,9 @@ copy. If you fork it, please say it is based on OpenMail by Dalsin
 Limited (a request, not a condition).
 
 Source: https://github.com/DalsinAI/openamigamail
+
+New in 0.3.1 (10 October 2026): the window first opens at 800 x 600, in
+the middle of the space beside OpenDock (or all of that space on a smaller
+screen), and the toolbar starts with icons only, as in every Open app. A
+size you give the window is kept. Settings > Toolbar still chooses icons
+and text, or text only.
