@@ -1,6 +1,6 @@
 /* oam_worker: the process that talks to the mail servers (DESIGN.md 1).
  *
- * It owns bsdsocket.library and AmiSSL and runs the engine, whose calls
+ * It owns bsdsocket.library and the TLS library (OpenTLS, or AmiSSL) and runs the engine, whose calls
  * block until a server answers; so the window never waits on the network.
  * The window sends jobs (exec messages) and the worker replies to each
  * when it is done. One worker, one connection, jobs in the order sent. */

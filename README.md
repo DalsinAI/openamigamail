@@ -12,7 +12,7 @@ It is written from the standards (RFC 3501, 5321, 5322, 2045-2049, 2047, 4616, 4
 | --- | --- |
 | `engine/` | Portable C: the protocols, MIME and the mail store. It builds unchanged for AmigaOS 3.x, AROS and the host |
 | `platform/posix/` | The network for the host's tests: POSIX sockets and OpenSSL |
-| `platform/amiga/` | The network on the Amiga: bsdsocket.library and AmiSSL 5; a bigger stack for main |
+| `platform/amiga/` | The network on the Amiga: bsdsocket.library and OpenTLS (opentls.library), AmiSSL 5 as a fallback when built in; a bigger stack for main |
 | `tools/` | OpenMailCheck: signs in, lists folders and the newest subjects. The engine's first program on the Amiga |
 | `tests/host/` | The engine's tests on the host, with a scripted IMAP server |
 
@@ -48,9 +48,10 @@ The fake server checks each command it receives, and a session passes only when 
 
 ## Building for the Amiga
 
-    ./build-os3.sh /path/to/AmiSSL/Developer/include
+    ./build-os3.sh                                   # OpenTLS (third_party/opentls)
+    ./build-os3.sh /path/to/AmiSSL/Developer/include # and AmiSSL 5 as a fallback
 
-It builds `build/os3/OpenMailCheck` with the os32 stove (bebbo's m68k-amigaos-gcc 6.5, NDK 3.2), soft float. To run it, the Amiga needs a TCP/IP stack (bsdsocket.library) and AmiSSL 5 installed:
+It builds `build/os3/OpenMailCheck` with the os32 stove (bebbo's m68k-amigaos-gcc 6.5, NDK 3.2), soft float. To run it, the Amiga needs a TCP/IP stack (bsdsocket.library) and OpenTLS (opentls.library, OpenUp's OpenTLS part) or AmiSSL 5 installed:
 
     OpenMailCheck imap.gmail.com 993 tls you@gmail.com S:token XOAUTH2
 

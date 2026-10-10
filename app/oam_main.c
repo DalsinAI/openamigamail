@@ -53,7 +53,7 @@
 
 struct Library *GadToolsBase = NULL;      /* ours, not libnix's auto-open stub */
 
-#define VERSION_TEXT "OpenMail 0.3.1 (10.10.2026)"
+#define VERSION_TEXT "OpenMail 0.3.2 (10.10.2026)"
 static const char version[] __attribute__((used)) = "$VER: " VERSION_TEXT;
 #define ACCOUNT_FILE "ENV:OpenMail/Account"
 #define THEME_ENV "ENV:OpenGadTools/Theme"
