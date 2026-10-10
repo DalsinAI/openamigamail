@@ -1,6 +1,6 @@
 /* oam_net: the one place the engine meets the network. Each platform
  * supplies these (platform/posix for the host's tests, platform/amiga for
- * bsdsocket.library and AmiSSL); the engine never includes a socket header.
+ * bsdsocket.library and OpenTLS, or AmiSSL); the engine never includes a socket header.
  * Errors come back as text in err (at most errlen bytes). */
 #ifndef OAM_NET_H
 #define OAM_NET_H
@@ -9,7 +9,7 @@
 
 typedef struct oam_conn oam_conn;
 
-/* Per task: on the Amiga, bsdsocket.library and AmiSSL belong to the task
+/* Per task: on the Amiga, bsdsocket.library and the TLS library belong to the task
  * that opens them, so the task that talks to servers calls oam_net_init
  * first and oam_net_cleanup at the end. 1 when the network is there. */
 int oam_net_init(char *err, size_t errlen);

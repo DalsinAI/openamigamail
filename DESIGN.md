@@ -13,7 +13,7 @@ Our requirements, 4 October 2026:
  the window (GadTools, the program's own task)
      |  jobs, as exec messages: connect, list, select, fetch, flag, send
      v
- the worker (a process of its own; it owns bsdsocket.library and AmiSSL)
+ the worker (a process of its own; it owns bsdsocket.library and the TLS library: OpenTLS, or AmiSSL when OpenTLS is missing)
      |  the engine: oam_imap, oam_smtp, MIME, the store
      v
  OpenSocket, or any bsdsocket.library  ->  the mail servers
@@ -21,7 +21,7 @@ Our requirements, 4 October 2026:
 
 - **Why two tasks.**
   - The engine's calls block until the server answers.
-  - bsdsocket.library and AmiSSL belong to the task that opens them.
+  - bsdsocket.library and the TLS library belong to the task that opens them.
   - So all network work runs in one worker process, and the window never waits on a server: it stays live, shows progress, and can cancel.
 - **Jobs.** The window sends `struct oam_job` messages and the worker replies to each when it is done. A job carries:
   - its kind;
