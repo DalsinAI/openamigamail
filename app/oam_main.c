@@ -13,7 +13,7 @@
  * the window waits for its answers alongside the user's input. This is
  * M3b: reading on the desk. Writing comes next (M4).
  *
- * MIT, Copyright (c) 2026 Dalsin Limited.
+ * MIT, Copyright (c) 2026 AmigaChrome Team.
  */
 #include <exec/types.h>
 #include <exec/memory.h>
@@ -1177,7 +1177,7 @@ static void close_window(void)
 static void about(void)
 {
     struct EasyStruct es = { sizeof(struct EasyStruct), 0, (UBYTE *)"OpenMail",
-        (UBYTE *)VERSION_TEXT "\n\nMail for the Amiga, drawn with OpenGadTools.\nMIT licence, Copyright (c) 2026 Dalsin Limited.", (UBYTE *)"OK" };
+        (UBYTE *)VERSION_TEXT "\n\nMail for the Amiga, drawn with OpenGadTools.\nMIT licence, Copyright (c) 2026 AmigaChrome Team.", (UBYTE *)"OK" };
     EasyRequestArgs(win, &es, NULL, NULL);
 }
 

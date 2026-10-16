@@ -1,5 +1,5 @@
 /* ogt_list: OpenGadTools' list, drawn in the theme.
- * MIT, Copyright (c) 2026 Dalsin Limited. */
+ * MIT, Copyright (c) 2026 AmigaChrome Team. */
 #include <exec/types.h>
 #include <exec/memory.h>
 #include <graphics/rastport.h>

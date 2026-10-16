@@ -1,5 +1,5 @@
 /* ogt_theme: reads OpenGadTools theme files (THEME_SPEC.md, version 1).
- * MIT, Copyright (c) 2026 Dalsin Limited. */
+ * MIT, Copyright (c) 2026 AmigaChrome Team. */
 #include "ogt_theme.h"
 
 #include <stdio.h>

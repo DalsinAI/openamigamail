@@ -7,7 +7,7 @@
  * edit hook keeps the real characters, appends at the end only, and treats
  * any other edit as starting again.
  *
- * MIT, Copyright (c) 2026 Dalsin Limited.
+ * MIT, Copyright (c) 2026 AmigaChrome Team.
  */
 #include <exec/types.h>
 #include <intuition/intuition.h>

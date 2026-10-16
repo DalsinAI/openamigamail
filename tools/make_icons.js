@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Copyright (c) 2026 Dalsin Limited. SPDX-License-Identifier: MIT
+// Copyright (c) 2026 AmigaChrome Team. SPDX-License-Identifier: MIT
 // OpenMail's icons, OS 3.2 style: an OS 3.5 colour icon with a classic
 // fallback picture, written by ACBuild's amiga-icon.js.
 //   node tools/make_icons.js AMIGA_ICON_JS ENVELOPE.rgba OUT_DIR

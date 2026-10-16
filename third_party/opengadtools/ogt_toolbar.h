@@ -3,7 +3,7 @@
  * the icon beside its name). Each button is a plain Intuition boolean
  * gadget that draws nothing itself; the toolbar draws them in the theme.
  *
- * MIT, Copyright (c) 2026 Dalsin Limited. */
+ * MIT, Copyright (c) 2026 AmigaChrome Team. */
 #ifndef OGT_TOOLBAR_H
 #define OGT_TOOLBAR_H
 
