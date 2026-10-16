@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2026 Dalsin Limited. SPDX-License-Identifier: MIT
+# Copyright (c) 2026 AmigaChrome Team. SPDX-License-Identifier: MIT
 """OpenMail's icon picture in full colour (RGBA), drawn at 4x and reduced,
 for tools/make_icons.js to turn into an OS 3.2-style colour icon.
     python3 tools/envelope_art.py OUT.rgba    (48 x 40, raw RGBA)"""

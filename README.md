@@ -2,7 +2,7 @@
 
 An email client for AmigaOS 3.2.3 and AROS 68k: IMAP and SMTP over TLS, OAuth 2 sign-in (XOAUTH2) for Gmail and Outlook.com, and a GadTools interface (AmigaOS 3.x programs are GadTools or MUI). It was called KyneMail, then OpenAmigaMail, until 4 October 2026.
 
-OpenMail is free: MIT licence (`LICENSE`, Copyright (c) 2026 Dalsin Limited), at no cost, to use, change, fork and pass on. The notice stays with every copy; if you fork it, please say it is based on OpenMail by Dalsin Limited (a request, not a condition).
+OpenMail is free: MIT licence (`LICENSE`, Copyright (c) 2026 AmigaChrome Team), at no cost, to use, change, fork and pass on. The notice stays with every copy; if you fork it, please say it is based on OpenMail by the AmigaChrome Team (a request, not a condition).
 
 It is written from the standards (RFC 3501, 5321, 5322, 2045-2049, 2047, 4616, 4959) and the providers' OAuth notes. SimpleMail served as a checklist of what a mail client on the Amiga does, but none of its code is used.
 
@@ -72,4 +72,4 @@ fallback picture.
 
 ## Contributors
 
-OpenMail is created and maintained by [SacredTrees](https://github.com/SacredTrees) with the AmigaChrome agent team, copyright Dalsin Limited. Everyone whose work it includes is credited in [`CONTRIBUTORS.md`](CONTRIBUTORS.md).
+OpenMail is created and maintained by [SacredTrees](https://github.com/SacredTrees) with the AmigaChrome agent team, copyright AmigaChrome Team. Everyone whose work it includes is credited in [`CONTRIBUTORS.md`](CONTRIBUTORS.md).

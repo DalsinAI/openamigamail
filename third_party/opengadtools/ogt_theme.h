@@ -5,7 +5,7 @@
  * its values are looked up by key and mode, and turned into colours,
  * gradients and numbers on demand.
  *
- * MIT, Copyright (c) 2026 Dalsin Limited. */
+ * MIT, Copyright (c) 2026 AmigaChrome Team. */
 #ifndef OGT_THEME_H
 #define OGT_THEME_H
 
