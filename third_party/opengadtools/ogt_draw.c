@@ -1,5 +1,5 @@
 /* ogt_draw: drawing a theme on an Amiga screen.
- * MIT, Copyright (c) 2026 Dalsin Limited. */
+ * MIT, Copyright (c) 2026 AmigaChrome Team. */
 #include <exec/types.h>
 #include <graphics/gfx.h>
 #include <graphics/rastport.h>

@@ -14,7 +14,7 @@
  *     pens at all; only text and lines use pens, matched as closely as the
  *     screen's 256-entry table allows.
  *
- * MIT, Copyright (c) 2026 Dalsin Limited. */
+ * MIT, Copyright (c) 2026 AmigaChrome Team. */
 #ifndef OGT_DRAW_H
 #define OGT_DRAW_H
 

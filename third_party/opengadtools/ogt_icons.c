@@ -1,5 +1,5 @@
 /* ogt_icons: icons drawn from shapes on a 48 x 48 grid.
- * MIT, Copyright (c) 2026 Dalsin Limited. */
+ * MIT, Copyright (c) 2026 AmigaChrome Team. */
 #include <exec/types.h>
 #include <graphics/rastport.h>
 #include <proto/graphics.h>

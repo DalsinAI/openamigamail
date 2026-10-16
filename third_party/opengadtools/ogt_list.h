@@ -7,7 +7,7 @@
  * IDCMP_MOUSEMOVE and IDCMP_IDCMPUPDATE; pass its messages to
  * ogt_list_event().
  *
- * MIT, Copyright (c) 2026 Dalsin Limited. */
+ * MIT, Copyright (c) 2026 AmigaChrome Team. */
 #ifndef OGT_LIST_H
 #define OGT_LIST_H
 

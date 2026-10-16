@@ -1,6 +1,6 @@
 Short:        Mail for AmigaOS 3: IMAP, TLS, OAuth
 Uploader:     (We fill this in at upload time)
-Author:       Dalsin Limited
+Author:       AmigaChrome Team
 Type:         comm/mail
 Version:      0.3.2
 Requires:     AmigaOS 3.0+, a TCP/IP stack, AmiSSL 5
@@ -42,10 +42,10 @@ the account is a text file, ENV:OpenMail/Account (see README.md).
 
 Licence
 -------
-MIT. Copyright (c) 2026 Dalsin Limited. Use it, change it, fork it and
+MIT. Copyright (c) 2026 AmigaChrome Team. Use it, change it, fork it and
 pass it on, free; the copyright and licence notice stays with every
-copy. If you fork it, please say it is based on OpenMail by Dalsin
-Limited (a request, not a condition).
+copy. If you fork it, please say it is based on OpenMail by the AmigaChrome
+Team (a request, not a condition).
 
 Source: https://github.com/DalsinAI/openamigamail
 
