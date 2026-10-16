@@ -3,7 +3,7 @@
  * any size, so toolbars follow the font. The shapes match the mock-ups
  * (DESIGN.md 2d; openamigamail DESIGN.md 2).
  *
- * MIT, Copyright (c) 2026 Dalsin Limited. */
+ * MIT, Copyright (c) 2026 AmigaChrome Team. */
 #ifndef OGT_ICONS_H
 #define OGT_ICONS_H
 

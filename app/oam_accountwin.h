@@ -1,4 +1,4 @@
-/* OpenMail's account window. MIT, Copyright (c) 2026 Dalsin Limited. */
+/* OpenMail's account window. MIT, Copyright (c) 2026 AmigaChrome Team. */
 #ifndef OAM_ACCOUNTWIN_H
 #define OAM_ACCOUNTWIN_H
 
