@@ -51,7 +51,7 @@ The fake server checks each command it receives, and a session passes only when 
     ./build-os3.sh                                   # OpenTLS (third_party/opentls)
     ./build-os3.sh /path/to/AmiSSL/Developer/include # and AmiSSL 5 as a fallback
 
-It builds `build/os3/OpenMailCheck` with the os32 stove (bebbo's m68k-amigaos-gcc 6.5, NDK 3.2), soft float. To run it, the Amiga needs a TCP/IP stack (bsdsocket.library) and OpenTLS (opentls.library, OpenUp's OpenTLS part) or AmiSSL 5 installed:
+It builds `build/os3/OpenMailCheck` with the os32 stove (bebbo's m68k-amigaos-gcc 6.5, NDK 3.2), for the 68040, soft float. To run it, the Amiga needs a TCP/IP stack (bsdsocket.library) and OpenTLS (opentls.library, OpenUp's OpenTLS part) or AmiSSL 5 installed:
 
     OpenMailCheck imap.gmail.com 993 tls you@gmail.com S:token XOAUTH2
 
