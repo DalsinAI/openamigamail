@@ -3,7 +3,7 @@ Uploader:     (We fill this in at upload time)
 Author:       AmigaChrome Team
 Type:         comm/mail
 Version:      0.3.2
-Requires:     AmigaOS 3.0+, a TCP/IP stack, AmiSSL 5
+Requires:     AmigaOS 3.0+, a 68040, a TCP/IP stack, AmiSSL 5
 Architecture: m68k-amigaos >= 3.0
 Distribution: Aminet
 
