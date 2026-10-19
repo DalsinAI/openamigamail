@@ -13,7 +13,7 @@ Our requirements, 4 October 2026:
  the window (GadTools, the program's own task)
      |  jobs, as exec messages: connect, list, select, fetch, flag, send
      v
- the worker (a process of its own; it owns bsdsocket.library and the TLS library: OpenTLS, or AmiSSL when OpenTLS is missing)
+ the worker (a process of its own; it owns bsdsocket.library and the TLS library: OpenTLS)
      |  the engine: oam_imap, oam_smtp, MIME, the store
      v
  OpenSocket, or any bsdsocket.library  ->  the mail servers

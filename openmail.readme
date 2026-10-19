@@ -2,8 +2,8 @@ Short:        Mail for AmigaOS 3: IMAP, TLS, OAuth
 Uploader:     (We fill this in at upload time)
 Author:       AmigaChrome Team
 Type:         comm/mail
-Version:      0.3.2
-Requires:     AmigaOS 3.0+, a 68040, a TCP/IP stack, AmiSSL 5
+Version:      0.3.3
+Requires:     AmigaOS 3.0+, a 68040, a TCP/IP stack, OpenTLS (opentls.library)
 Architecture: m68k-amigaos >= 3.0
 Distribution: Aminet
 
@@ -13,7 +13,7 @@ standards (RFC 3501, 5321, 5322, MIME) with a GadTools interface.
 What it does today
 ------------------
 - Reads mail over IMAP, with TLS or STARTTLS and the certificate checked
-  (AmiSSL 5).
+  (OpenTLS: opentls.library, OpenUp's OpenTLS part).
 - Signs in with a password or an OAuth token (XOAUTH2).
 - Shows folders, the newest messages (unread and flagged marked), and
   each message as text: multipart mail, quoted-printable and base64,
@@ -48,6 +48,10 @@ copy. If you fork it, please say it is based on OpenMail by the AmigaChrome
 Team (a request, not a condition).
 
 Source: https://github.com/DalsinAI/openamigamail
+
+New in 0.3.3 (19 October 2026): OpenTLS only. AmiSSL is no longer used or
+needed, and OpenMail is built with OpenAmigaGCC 16.2.0-open2. An error
+from OpenTLS ends with one full stop, not two.
 
 New in 0.3.2 (10 October 2026): secure connections through OpenTLS
 (opentls.library), the Open family's own TLS, so mail works without AmiSSL;
