@@ -5,8 +5,10 @@
 # or used. Built for the 68040, soft float (no FPU code).
 #   build-os3.sh [OUT_DIR]       (default build/os3)
 #
-#   STOVE   the stove (default ~/AmigaChrome/stoves/os32-gcc16; ~/AmigaChrome/stoves/os32
-#           is GCC 6.5, which builds it too)
+#   STOVE   the stove (default ~/AmigaChrome/stoves/os32-gcc16; OS32_GCC16 comes
+#           first). It stops when given a GCC older than 16: the os32 stove's
+#           GCC 6.5 is retired (its peephole2 clears a word and the long after
+#           it with one clr.l)
 #
 # Before 0.3.3 the first argument was the AmiSSL 5 SDK's include folder (or
 # "-" for none). Such a first argument, followed by OUT_DIR, is still taken
@@ -14,8 +16,10 @@
 # it is now rather than into the SDK's folder.
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
-STOVE=${STOVE:-$HOME/AmigaChrome/stoves/os32-gcc16}
+STOVE=${OS32_GCC16:-${STOVE:-$HOME/AmigaChrome/stoves/os32-gcc16}}
 CC="$STOVE/prefix/bin/m68k-amigaos-gcc"
+GCCV=$("$CC" -dumpversion 2>/dev/null || echo 0)
+[ "${GCCV%%.*}" -ge 16 ] 2>/dev/null || { echo "$CC is GCC $GCCV: OpenMail needs GCC 16 (the os32-gcc16 stove; set OS32_GCC16)"; exit 2; }
 if [ $# -ge 1 ] && { [ "$1" = "-" ] || [ -f "$1/proto/amissl.h" ]; }; then
     [ "$1" = "-" ] || echo "build-os3.sh: OpenMail is OpenTLS only now; $1 (an AmiSSL SDK) is not used"
     shift
