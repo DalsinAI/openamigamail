@@ -4,7 +4,7 @@ _Written 6 October 2026 at about 23:55 UTC, while all work is paused on @SacredT
 
 ## What this repo is
 
-OpenMail: a GadTools e-mail client for AmigaOS 3.2.3 and AROS with IMAP over OpenSocket and AmiSSL. MIT, our own code.
+OpenMail: a GadTools e-mail client for AmigaOS 3.2.3 and AROS with IMAP over OpenSocket and OpenTLS (AmiSSL until 0.3.2). MIT, our own code.
 
 ## Where it stands
 
