@@ -12,7 +12,7 @@ It is written from the standards (RFC 3501, 5321, 5322, 2045-2049, 2047, 4616, 4
 | --- | --- |
 | `engine/` | Portable C: the protocols, MIME and the mail store. It builds unchanged for AmigaOS 3.x, AROS and the host |
 | `platform/posix/` | The network for the host's tests: POSIX sockets and OpenSSL |
-| `platform/amiga/` | The network on the Amiga: bsdsocket.library and OpenTLS (opentls.library), AmiSSL 5 as a fallback when built in; a bigger stack for main |
+| `platform/amiga/` | The network on the Amiga: bsdsocket.library and OpenTLS (opentls.library); a bigger stack for main |
 | `tools/` | OpenMailCheck: signs in, lists folders and the newest subjects. The engine's first program on the Amiga |
 | `tests/host/` | The engine's tests on the host, with a scripted IMAP server |
 
@@ -24,7 +24,7 @@ The engine meets the network only through `engine/oam_net.h`, so the same protoc
 | --- | --- |
 | 1. IMAP over TLS or STARTTLS: PLAIN, LOGIN and XOAUTH2 sign-in; folders; select; summaries; whole messages; flags | **Done, tested on x86 cores** |
 | 2. Headers for people: fields, RFC 2047 encoded words, names and addresses, dates; seven charsets to UTF-8, and UTF-8 to the Amiga's Latin-1 | **Done, tested on x86 cores** |
-| 3. The Amiga's network: bsdsocket.library and AmiSSL 5 (`OpenAmiSSLTags`), read timeouts with WaitSelect | **Done**: on AmigaOS 3.2.3 over ACNet, now OpenSocket (2 Oct 2026), OpenMailCheck reaches imap.gmail.com and outlook.office365.com: DNS, TCP, a TLS handshake with the certificate checked, and the IMAP capabilities (both offer XOAUTH2) |
+| 3. The Amiga's network: bsdsocket.library and OpenTLS (AmiSSL 5 until 0.3.2), read timeouts with WaitSelect | **Done**: on AmigaOS 3.2.3 over ACNet, now OpenSocket (2 Oct 2026), OpenMailCheck reaches imap.gmail.com and outlook.office365.com: DNS, TCP, a TLS handshake with the certificate checked, and the IMAP capabilities (both offer XOAUTH2) |
 | 4. The ReAction main window: folders, message list, plain-text reading | |
 | 5. SMTP and the compose window | |
 | 6. MIME: multipart, quoted-printable, base64, attachments | |
@@ -46,16 +46,26 @@ This builds the engine with AddressSanitizer and UBSan, makes a throwaway CA and
 
 The fake server checks each command it receives, and a session passes only when both sides agree.
 
+## Testing on the Amiga (a lab)
+
+`tests/lab/imapd_lab.py PORT USER PASSWORD --security tls|starttls|plain --cert C --key K` is a throwaway IMAP server on the PC's 127.0.0.1 (Python's own `ssl`): one account, an INBOX of made-up messages (the newest 256 KiB, to move some data through TLS) and a few folders, one with a Latin-1 name. A lab's Amiga reaches it through openamigatls' `tests/lab/pyhook` (`OPENTLS_LAB_PORTS`).
+
+0.3.3 on 19 October 2026 (lab copied from Instance-32: AmigaOS 3.2.3, AC090 68040, OpenSocket; opentls.library 1.2 and opencrypto.library 2.0 from openamigatls main e7c0e2d, built with OpenAmigaGCC 16.2.0-open2), with a throwaway authority in `ENVARC:OpenTLS/certs/`:
+
+- OpenMailCheck over IMAPS and over STARTTLS, the server's certificate from that authority: TLS 1.2 (ECDHE-RSA-AES256-GCM-SHA384), signed in, 5 folders (Grüße shown right), the newest 10 subjects with RFC 2047 words decoded and the unread ones marked;
+- the probe (`-`): each step, then "Connected over TLS, its certificate checked";
+- refused, each with the reason in words: a certificate for another name, an expired one, a self-signed one; a wrong password; STARTTLS asked of a server without it;
+- OpenMail's window: the INBOX listed, and the 256 KiB message fetched over TLS and shown.
+
 ## Building for the Amiga
 
-    ./build-os3.sh                                   # OpenTLS (third_party/opentls)
-    ./build-os3.sh /path/to/AmiSSL/Developer/include # and AmiSSL 5 as a fallback
+    ./build-os3.sh                  # build/os3: OpenMail and OpenMailCheck
 
-It builds `build/os3/OpenMailCheck` with the os32 stove (bebbo's m68k-amigaos-gcc 6.5, NDK 3.2), for the 68040, soft float. To run it, the Amiga needs a TCP/IP stack (bsdsocket.library) and OpenTLS (opentls.library, OpenUp's OpenTLS part) or AmiSSL 5 installed:
+It builds `build/os3/OpenMail` and `build/os3/OpenMailCheck` with OpenAmigaGCC 16.2.0-open2 (the os32-gcc16 stove: `STOVE`, default `~/AmigaChrome/stoves/os32-gcc16`; the GCC 6.5 stove builds it too), for the 68040, soft float, with `-Wall -Werror`. TLS is OpenTLS (`third_party/opentls`: opentls.library's API headers), and nothing else: since 0.3.3 OpenMail neither uses nor needs AmiSSL. To run it, the Amiga needs a TCP/IP stack (bsdsocket.library) and OpenTLS (opentls.library with opencrypto.library, OpenUp's OpenTLS part):
 
     OpenMailCheck imap.gmail.com 993 tls you@gmail.com S:token XOAUTH2
 
-`OpenMailCheck HOST 993 tls - FILE` only connects and shows what the server offers, with each step (opening the stack and AmiSSL, resolving, connecting, the handshake) on its own line: a check of the network without signing in.
+`OpenMailCheck HOST 993 tls - FILE` only connects and shows what the server offers, with each step (opening the stack and OpenTLS, resolving, connecting, the handshake) on its own line: a check of the network without signing in.
 
 **Stacks:** a Shell gives a command 4 KB of stack, and the engine needs more: a TLS handshake alone runs deep. OpenMail's programs swap to a 64 KB stack at start (`oam_run_with_stack`). An `oam_imap` is about 4.3 KB, so keep it on the heap.
 

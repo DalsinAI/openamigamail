@@ -1,6 +1,6 @@
 /* oam_net: the one place the engine meets the network. Each platform
  * supplies these (platform/posix for the host's tests, platform/amiga for
- * bsdsocket.library and OpenTLS, or AmiSSL); the engine never includes a socket header.
+ * bsdsocket.library and OpenTLS); the engine never includes a socket header.
  * Errors come back as text in err (at most errlen bytes). */
 #ifndef OAM_NET_H
 #define OAM_NET_H
