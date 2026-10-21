@@ -37,7 +37,7 @@ for buttons, some features you would expect, a side panel for folders."
 And on sign-in: "really we want OpenMail to do this" (OAuth).
 
 **Mock-up:** the "OpenMail Desk" canvas,
-(mockup link removed) (private until we share it). It has four boards:
+in the Team's design archive. It has four boards:
 - the desk in the Open theme;
 - writing a reply;
 - the Open theme, dark;
