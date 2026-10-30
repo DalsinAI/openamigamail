@@ -25,7 +25,7 @@ Copyright (c) 2026 AmigaChrome Team, released under the MIT licence (`LICENSE`).
 
 ### From our other repositories
 
-- **OpenGadTools** (`DalsinAI/opengadtools`): a copy of its library in `third_party/opengadtools`, and the themes in `package/Themes/`, MIT, AmigaChrome Team.
+- **OpenGadTools** (`DalsinAI/opengadtools`): its library, built from a checkout beside this one (`OGT`), and the themes in `package/Themes/`, MIT, AmigaChrome Team.
 
 ## Work we learned from
 
