@@ -5,6 +5,8 @@
 # or used. Built for the 68040, soft float (no FPU code).
 #   build-os3.sh [OUT_DIR]       (default build/os3)
 #
+#   OGT     the opengadtools checkout (default ../opengadtools): OpenMail is
+#           drawn with its lib/, as the other Open apps are
 #   STOVE   the stove (default ~/AmigaChrome/stoves/os32-gcc16; OS32_GCC16 comes
 #           first). It stops when given a GCC older than 16: the os32 stove's
 #           GCC 6.5 is retired (its peephole2 clears a word and the long after
@@ -25,6 +27,8 @@ if [ $# -ge 1 ] && { [ "$1" = "-" ] || [ -f "$1/proto/amissl.h" ]; }; then
     shift
 fi
 OUT=${1:-$HERE/build/os3}
+OGT=${OGT:-$HERE/../opengadtools}
+[ -f "$OGT/lib/ogt_look.c" ] || { echo "build-os3.sh: no opengadtools at $OGT (set OGT)"; exit 2; }
 TLS="-I$HERE/third_party/opentls/include"
 mkdir -p "$OUT"
 # Soft float: -m68040 links libnix's soft libm020, not libm881
@@ -35,8 +39,10 @@ COMMON="-noixemul -m68040 $SOFT -std=gnu99 -Wall -Werror -O2 -fno-delete-null-po
 "$CC" $COMMON -I"$HERE/engine" -I"$HERE/platform/amiga" $TLS \
     "$HERE"/engine/*.c "$HERE"/platform/amiga/*.c "$HERE/tools/openmailcheck.c" -o "$OUT/OpenMailCheck"
 echo "$OUT/OpenMailCheck ($(wc -c < "$OUT/OpenMailCheck") bytes)"
-# OpenMail itself: the desk (app/), drawn with OpenGadTools (third_party/), on the same engine.
+# OpenMail itself: the desk (app/), drawn with OpenGadTools ($OGT/lib, its look and font), on the same engine.
 # shellcheck disable=SC2086
-"$CC" $COMMON -Wno-pointer-sign -fno-common -I"$HERE/engine" -I"$HERE/platform/amiga" -I"$HERE/app" -I"$HERE/third_party/opengadtools" $TLS \
-    "$HERE"/engine/*.c "$HERE"/platform/amiga/*.c "$HERE"/app/*.c "$HERE"/third_party/opengadtools/*.c -lamiga -o "$OUT/OpenMail"
+"$CC" $COMMON -Wno-pointer-sign -fno-common -I"$HERE/engine" -I"$HERE/platform/amiga" -I"$HERE/app" -I"$OGT/lib" $TLS \
+    "$HERE"/engine/*.c "$HERE"/platform/amiga/*.c "$HERE"/app/*.c \
+    "$OGT/lib/ogt_theme.c" "$OGT/lib/ogt_draw.c" "$OGT/lib/ogt_icons.c" "$OGT/lib/ogt_list.c" \
+    "$OGT/lib/ogt_toolbar.c" "$OGT/lib/ogt_font.c" "$OGT/lib/ogt_look.c" -lamiga -o "$OUT/OpenMail"
 echo "$OUT/OpenMail ($(wc -c < "$OUT/OpenMail") bytes)"

@@ -50,27 +50,26 @@
 #include "ogt_icons.h"
 #include "ogt_toolbar.h"
 #include "ogt_list.h"
+#include "ogt_look.h"
+#include "ogt_font.h"
 
 struct Library *GadToolsBase = NULL;      /* ours, not libnix's auto-open stub */
 
-#define VERSION_TEXT "OpenMail 0.3.3 (19.10.2026)"
+#define VERSION_TEXT "OpenMail 0.3.4 (30.10.2026)"
 static const char version[] __attribute__((used)) = "$VER: " VERSION_TEXT;
 #define ACCOUNT_FILE "ENV:OpenMail/Account"
-#define THEME_ENV "ENV:OpenGadTools/Theme"
-#define THEME_ENVARC "ENVARC:OpenGadTools/Theme"
 
 /* the commands, from the toolbars, menus and keys */
 enum { C_NEW = 1, C_REPLY, C_REPLYALL, C_FORWARD, C_DELETE, C_ARCHIVE, C_JUNK, C_MOVE, C_FLAG, C_UNREAD, C_GET,
        C_BROWSER, C_LINKS };
 enum { GID_SEARCH = 1, GID_FOLDERS = 10, GID_MESSAGES = 11, GID_BODY = 12, GID_TOOLBAR = 100, GID_READBAR = 150 };
 enum { M_ABOUT = 1, M_QUIT, M_GET, M_BROWSER, M_LINKS, M_ACCOUNT, M_FLAG, M_UNREAD, M_DELETE,
-       M_TH_OPEN, M_TH_OPEN_DARK, M_TH_GRAPHITE, M_TH_GRAPHITE_DARK, M_TH_CLASSIC,
        M_TB_BOTH, M_TB_ICONS, M_TB_TEXT };
 
 static struct NewMenu menus[] = {
     { NM_TITLE, "Project", NULL, 0, 0, NULL },
-    { NM_ITEM, "Account...", "A", 0, 0, (APTR)M_ACCOUNT },
-    { NM_ITEM, "About...", NULL, 0, 0, (APTR)M_ABOUT },
+    { NM_ITEM, "Account...", NULL, 0, 0, (APTR)M_ACCOUNT },
+    { NM_ITEM, "About...", "?", 0, 0, (APTR)M_ABOUT },
     { NM_ITEM, NM_BARLABEL, NULL, 0, 0, NULL },
     { NM_ITEM, "Quit", "Q", 0, 0, (APTR)M_QUIT },
     { NM_TITLE, "Mailbox", NULL, 0, 0, NULL },
@@ -83,12 +82,6 @@ static struct NewMenu menus[] = {
     { NM_ITEM, "View in browser", "B", 0, 0, (APTR)M_BROWSER },
     { NM_ITEM, "Links...", "L", 0, 0, (APTR)M_LINKS },
     { NM_TITLE, "Settings", NULL, 0, 0, NULL },
-    { NM_ITEM, "Theme", NULL, 0, 0, NULL },
-    { NM_SUB, "Open (light)", NULL, CHECKIT, ~1 & 31, (APTR)M_TH_OPEN },
-    { NM_SUB, "Open (dark)", NULL, CHECKIT, ~2 & 31, (APTR)M_TH_OPEN_DARK },
-    { NM_SUB, "Graphite (light)", NULL, CHECKIT, ~4 & 31, (APTR)M_TH_GRAPHITE },
-    { NM_SUB, "Graphite (dark)", NULL, CHECKIT, ~8 & 31, (APTR)M_TH_GRAPHITE_DARK },
-    { NM_SUB, "Classic", NULL, CHECKIT, ~16 & 31, (APTR)M_TH_CLASSIC },
     { NM_ITEM, "Toolbar", NULL, 0, 0, NULL },
     { NM_SUB, "Icons and text", NULL, CHECKIT, ~1 & 7, (APTR)M_TB_BOTH },
     { NM_SUB, "Icons only", NULL, CHECKIT | CHECKED, ~2 & 7, (APTR)M_TB_ICONS },
@@ -133,7 +126,6 @@ static BOOL quit_now;
 
 static ogt_theme theme;
 static ogt_ctx ctx;
-static char theme_name[48] = "Open";
 static int theme_mode = OGT_LIGHT;
 static int tb_style = OGT_TB_ICONS;     /* icons only to start (the Team's rule, 10 October 2026) */
 static ogt_toolbar tb, rb;
@@ -287,68 +279,11 @@ static int folder_icon(const char *name)
 
 /* ---- the theme -------------------------------------------------------------------- */
 
-static const char classic_theme[] =
-    "name Classic\nversion 1\nfont system\ntitle.align left\npassthrough yes\n[four]\n"
-    "pens #aaaaaa #000000 #ffffff #6688bb\ntitle.active.fill 3\ntitle.active.text 1\nfill.text 1\n";
-
-static char *read_file(const char *path)
-{
-    BPTR fh = Open((STRPTR)path, MODE_OLDFILE);
-    char *buf;
-    LONG n, size = 32768;
-    if (!fh) return NULL;
-    if (!(buf = malloc(size))) { Close(fh); return NULL; }
-    n = Read(fh, buf, size - 1);
-    Close(fh);
-    if (n < 0) { free(buf); return NULL; }
-    buf[n] = 0;
-    return buf;
-}
-
+/* The look every Open app has: OpenPrefs Look's theme, mode, accent and Scale (ogt_look_load) */
 static void load_theme(void)
 {
-    char path[128], err[120];
-    char *text = NULL;
-    snprintf(path, sizeof path, "PROGDIR:Themes/%s.theme", theme_name);
-    if (!(text = read_file(path))) {
-        snprintf(path, sizeof path, "SYS:Prefs/Presets/Themes/%s.theme", theme_name);
-        text = read_file(path);
-    }
     if (theme.text) ogt_theme_free(&theme);
-    if (!text || !ogt_theme_parse(&theme, text, err, sizeof err)) {
-        ogt_theme_parse(&theme, classic_theme, err, sizeof err);
-        strcpy(theme_name, "Classic");
-    }
-    free(text);
-}
-
-/* ENV:OpenGadTools/Theme: the theme's name, then light or dark. */
-static void read_theme_choice(void)
-{
-    char *s = read_file(THEME_ENV);
-    if (s) {
-        char *nl = strchr(s, '\n');
-        if (nl) *nl = 0;
-        if (s[0] && strlen(s) < sizeof theme_name) strcpy(theme_name, s);
-        theme_mode = nl && !strncmp(nl + 1, "dark", 4) ? OGT_DARK : OGT_LIGHT;
-        free(s);
-    }
-}
-
-static void save_theme_choice(void)
-{
-    char line[80];
-    const char *paths[] = { THEME_ENV, THEME_ENVARC };
-    unsigned i;
-    snprintf(line, sizeof line, "%s\n%s\n", theme_name, theme_mode == OGT_DARK ? "dark" : "light");
-    for (i = 0; i < 2; i++) {
-        BPTR fh;
-        UnLock(CreateDir((STRPTR)(i ? "ENVARC:OpenGadTools" : "ENV:OpenGadTools")));
-        if ((fh = Open((STRPTR)paths[i], MODE_NEWFILE))) {
-            Write(fh, line, strlen(line));
-            Close(fh);
-        }
-    }
+    ogt_look_load(&theme, &theme_mode);
 }
 
 /* ---- the folder side panel -------------------------------------------------------- */
@@ -1043,14 +978,6 @@ static void relayout(void)
     draw_all();
 }
 
-static void apply_theme(void)
-{
-    ogt_ctx_free(&ctx);
-    load_theme();
-    ogt_ctx_init(&ctx, scr, &theme, theme_mode);
-    if (win) relayout();
-}
-
 /* The part of the screen a full-size window may have: below the title bar,
  * less the strip OpenDock takes along an edge (OpenFiles' free_area(), copied
  * here). OpenDock's window is the one whose screen title starts "OpenDock";
@@ -1124,10 +1051,10 @@ static BOOL open_window(void)
     int l, t, w, h, mh;
     if (!(scr = LockPubScreen(NULL))) return FALSE;
     if (!(vi = GetVisualInfo(scr, TAG_DONE))) return FALSE;
-    font_attr = *scr->Font;
-    if (!(font = OpenFont(&font_attr))) return FALSE;
-    fh = font->tf_YSize;
     load_theme();
+    /* the theme's font at its size, grown with Look's Scale, as the other Open apps */
+    if (!(font = ogt_open_font(&theme, scr, &font_attr))) return FALSE;
+    fh = font->tf_YSize;
     ogt_ctx_init(&ctx, scr, &theme, theme_mode);
     if ((menu = CreateMenus(menus, TAG_DONE))) LayoutMenus(menu, vi, GTMN_NewLookMenus, TRUE, TAG_DONE);
     start_box(&l, &t, &w, &h);     /* 800 x 600 in the free area, or the free area when smaller */
@@ -1143,15 +1070,7 @@ static BOOL open_window(void)
                                    IDCMP_IDCMPUPDATE | STRINGIDCMP,
                          TAG_DONE);
     if (!win) return FALSE;
-    if (menu) {
-        /* tick the theme and toolbar style in use */
-        struct MenuItem *item;
-        UWORD num;
-        int which = !strcmp(theme_name, "Classic") ? 4 : (!strcmp(theme_name, "Graphite") ? 2 : 0) + (theme_mode == OGT_DARK);
-        num = FULLMENUNUM(3, 0, which);
-        if ((item = ItemAddress(menu, num))) item->Flags |= CHECKED;
-        SetMenuStrip(win, menu);
-    }
+    if (menu) SetMenuStrip(win, menu);
     relayout();
     return TRUE;
 }
@@ -1242,14 +1161,6 @@ static void do_command(int id)
     }
 }
 
-static void set_theme(const char *name, int mode)
-{
-    snprintf(theme_name, sizeof theme_name, "%s", name);
-    theme_mode = mode;
-    save_theme_choice();
-    apply_theme();
-}
-
 static void toolbar_event(ogt_toolbar *t, ULONG class, struct Gadget *g)
 {
     int i = ogt_toolbar_index(t, g->GadgetID);
@@ -1338,11 +1249,6 @@ static void window_events(void)
                         case M_UNREAD: do_command(C_UNREAD); break;
                         case M_DELETE: do_command(C_DELETE); break;
                         case M_ACCOUNT: account_menu(); break;
-                        case M_TH_OPEN: set_theme("Open", OGT_LIGHT); break;
-                        case M_TH_OPEN_DARK: set_theme("Open", OGT_DARK); break;
-                        case M_TH_GRAPHITE: set_theme("Graphite", OGT_LIGHT); break;
-                        case M_TH_GRAPHITE_DARK: set_theme("Graphite", OGT_DARK); break;
-                        case M_TH_CLASSIC: set_theme("Classic", OGT_LIGHT); break;
                         case M_TB_BOTH: tb_style = OGT_TB_ICONS_TEXT; relayout(); break;
                         case M_TB_ICONS: tb_style = OGT_TB_ICONS; relayout(); break;
                         case M_TB_TEXT: tb_style = OGT_TB_TEXT; relayout(); break;
@@ -1388,7 +1294,6 @@ static int mail_main(int argc, char **argv)
         return 20;
     }
     if (!(replies = CreateMsgPort())) { CloseLibrary(GadToolsBase); return 20; }
-    read_theme_choice();
     if (!open_window()) {
         PutStr((STRPTR)"OpenMail: the window could not open\n");
         close_window();
